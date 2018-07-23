@@ -1,7 +1,4 @@
 import validateJs from 'validate.js';
-import find from 'lodash/find';
-
-
 
 export const getFieldValue = function (field, documentData = {}) {
   const formatter = field.formatter;
