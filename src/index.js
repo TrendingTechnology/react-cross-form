@@ -24,19 +24,19 @@ class DocForm extends React.Component {
   }
 
   onChange(res) {
-    const {key, value, isValid, event } = res
+    const {key, value, isValid, event, ...resParameters} = res
     const { changedFields } = this.state
     if (!changedFields[key]) {
       changedFields[key] = true
       this.setState({ changedFields })
     }
     const initialValue = this.fieldsInitialValue[key]
-    const updateData = Object.assign({}, this.props.data, {[key]: value})
-    this.props.onChange({key, value, isValid, initialValue, updateData, event, resParameters: res})
+    const updateData = {...this.props.data, [key]: value}
+    this.props.onChange({key, value, isValid, initialValue, updateData, event, resParameters})
   }
 
   onFocus(res) {
-    const {key, value, isValid, event } = res
+    const {key, value, isValid, event, ...resParameters} = res
     const { focusFields } = this.state
     const {onFocus} = this.props
     if (!focusFields[key]) {
@@ -47,11 +47,11 @@ class DocForm extends React.Component {
         this.fieldsInitialValue[key] !== value
     }
     const initialValue = this.fieldsInitialValue[key]
-    onFocus && onFocus({key, value, isValid, initialValue, event, resParameters: res})
+    onFocus && onFocus({key, value, isValid, initialValue, event, resParameters})
   }
 
   onBlur(res) {
-    const {key, value, isValid, event } = res
+    const {key, value, isValid, event, ...resParameters} = res
     const { blurFields } = this.state
     const {onBlur} = this.props
     if (!blurFields[key]) {
@@ -59,7 +59,7 @@ class DocForm extends React.Component {
       this.setState({ blurFields })
     }
     const initialValue = this.fieldsInitialValue[key]
-    onBlur && onBlur({key, value, isValid, initialValue, event, resParameters: res})
+    onBlur && onBlur({key, value, isValid, initialValue, event, resParameters})
   }
 
   enableValidateField(field) {

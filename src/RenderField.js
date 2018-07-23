@@ -20,7 +20,7 @@ class RenderField extends React.PureComponent {
   }
 
   renderFieldByType() {
-    const {field, data, onChange, onFocus, onBlur, displayValidState, required, fieldData} = this.props
+    const {field, data, onChange, onFocus, onBlur, displayValidState, required, fieldData, ...resProps} = this.props
     const InputElement = field.component;
     const key = field.key;
     const value = getFieldValue(field, data, fieldData);
@@ -40,8 +40,8 @@ class RenderField extends React.PureComponent {
         validatorMessage={_validatorMessage}
         required={required}
         fieldData={fieldData}
-        field={field}
-        {...this.props}
+        {...resProps}
+        {...field}
       />
     )
   }

@@ -1,10 +1,10 @@
 {
   "name": "react-cross-form",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Easy form for react and react-native with validation base validate.js",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel --plugins transform-es2015-modules-umd src --ignore __tests__ --out-dir ./dist",
+    "build": "nwb build-react-component --title react-cross-form",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -32,27 +32,23 @@
     "babel-preset-latest": "^6.24.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.6.4",
-    "babel-core": "^6.7.4",
-    "babel-eslint": "^6.0.2",
-    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-plugin-transform-regenerator": "^6.26.0",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-react": "^6.5.0",
-    "babel-preset-stage-0": "^6.0.15",
-    "babel-preset-stage-2": "^6.5.0",
-    "chai": "^3.5.0",
-    "enzyme": "^2.2.0",
-    "eslint": "^2.7.0",
-    "eslint-plugin-babel": "^3.1.0",
-    "eslint-plugin-react": "^4.2.3",
-    "jsdom": "^8.1.0",
-    "mocha": "^2.4.5",
-    "nodemon": "^1.9.1",
-    "react": "^15.0.0",
-    "react-addons-test-utils": "^15.0.0",
-    "react-dom": "^15.0.0",
-    "sinon": "^1.17.3"
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-runtime": "^6.26.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "cross-env": "^5.1.3",
+    "css-loader": "^0.28.5",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "eslint": "^4.5.0",
+    "eslint-config-react-tools": "^1.0.10",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0",
+    "gitdocs": "^1.5.17",
+    "jsdom": "^11.6.0",
+    "nwb": "^0.21.2"
   }
 }
