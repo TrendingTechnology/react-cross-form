@@ -1,6 +1,6 @@
 {
   "name": "react-cross-form",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Easy form for react and react-native with validation base validate.js",
   "main": "dist/index.js",
   "scripts": {
@@ -36,6 +36,7 @@
     "babel-core": "^6.7.4",
     "babel-eslint": "^6.0.2",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-plugin-transform-regenerator": "^6.26.0",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-react": "^6.5.0",
