@@ -16,7 +16,7 @@ npm i react-cross-form --save
 | fields| array| Array of fileds to render. see [Field object](#field-object) for more details.
 | validateType| string| ``` 'none' | 'all' | 'onFocus' | 'onBlur' | 'onChange' ``` see [Validate Type](#validate-type) for more details.
 |onFocus, onChange(required), onBlur|function| Functions that gets called by input events. Function recieves object,  see [Input event](#input-event) for more details.|
-
+|onValidateStateChanged|function| Functions that gets called when the validation state was changed |
 ###  Field object
 ```jsx
 key:  PropTypes.string.isRequired, // firstName
