@@ -4,15 +4,13 @@ import RenderField from './RenderField';
 
 class DocForm extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       changedFields: {},
       focusFields: {},
       blurFields: {},
       unValidFields: [],
-      showConfirmModal: false,
-      fileInclude: false
-    }
+    };
     this.renderFields = this.renderFields.bind(this);
     this.renderField = this.renderField.bind(this);
     this.onFocus = this.onFocus.bind(this);
@@ -20,84 +18,100 @@ class DocForm extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.enableValidateField = this.enableValidateField.bind(this);
     this.onValidateStateChanged = this.onValidateStateChanged.bind(this);
-    this.fieldsInitialValue = {}
+    this.fieldsInitialValue = {};
   }
 
   onChange(res) {
-    const {key, value, isValid, event, ...resParameters} = res
-    const { changedFields } = this.state
+    const {
+      key, value, isValid, event, ...resParameters
+    } = res;
+    const { changedFields } = this.state;
     if (!changedFields[key]) {
-      changedFields[key] = true
-      this.setState({ changedFields })
+      changedFields[key] = true;
+      this.setState({ changedFields });
     }
-    const initialValue = this.fieldsInitialValue[key]
-    const updateData = {...this.props.data, [key]: value}
-    this.props.onChange({key, value, isValid, initialValue, updateData, event, resParameters})
+    const initialValue = this.fieldsInitialValue[key];
+    const updateData = { ...this.props.data, [key]: value };
+    this.props.onChange({
+      key, value, isValid, initialValue, updateData, event, resParameters
+    });
   }
 
   onFocus(res) {
-    const {key, value, isValid, event, ...resParameters} = res
-    const { focusFields } = this.state
-    const {onFocus} = this.props
+    const {
+      key, value, isValid, event, ...resParameters
+    } = res;
+    const { focusFields } = this.state;
+    const { onFocus } = this.props;
     if (!focusFields[key]) {
-      focusFields[key] = true
-      this.setState({ focusFields })
+      focusFields[key] = true;
+      this.setState({ focusFields });
     }
-    if(this.fieldsInitialValue[key] === undefined){
-        this.fieldsInitialValue[key] !== value
+    if (this.fieldsInitialValue[key] === undefined) {
+      this.fieldsInitialValue[key] !== value;
     }
-    const initialValue = this.fieldsInitialValue[key]
-    onFocus && onFocus({key, value, isValid, initialValue, event, resParameters})
+    const initialValue = this.fieldsInitialValue[key];
+    onFocus && onFocus({
+      key, value, isValid, initialValue, event, resParameters
+    });
   }
 
   onBlur(res) {
-    const {key, value, isValid, event, ...resParameters} = res
-    const { blurFields } = this.state
-    const {onBlur} = this.props
+    const {
+      key, value, isValid, event, ...resParameters
+    } = res;
+    const { blurFields } = this.state;
+    const { onBlur } = this.props;
     if (!blurFields[key]) {
-      blurFields[key] = true
-      this.setState({ blurFields })
+      blurFields[key] = true;
+      this.setState({ blurFields });
     }
-    const initialValue = this.fieldsInitialValue[key]
-    onBlur && onBlur({key, value, isValid, initialValue, event, resParameters})
-  }
-
-  enableValidateField(field) {
-    const {validateType} = this.props
-    const {focusFields, blurFields, changedFields} = this.state
-    let displayValidState = false;
-    if(validateType === 'none') {
-      displayValidState = false
-    }else if(validateType === 'all'){
-      displayValidState = true
-    }else if(validateType === 'onFocus'){
-      displayValidState = focusFields[field.key]
-    } else if(validateType === 'onBlur'){
-      displayValidState = blurFields[field.key]
-    } else if(validateType === 'onChange'){
-      displayValidState = changedFields[field.key]
-    }
-    return displayValidState
+    const initialValue = this.fieldsInitialValue[key];
+    onBlur && onBlur({
+      key, value, isValid, initialValue, event, resParameters
+    });
   }
 
   onValidateStateChanged(fieldKey, isValid) {
-    let { unValidFields } = this.state
-    const {onValidateStateChanged} = this.props
+    let { unValidFields } = this.state;
+    const { onValidateStateChanged } = this.props;
     if (isValid) {
-      unValidFields = unValidFields.filter(field => field !== fieldKey)
+      unValidFields = unValidFields.filter(field => field !== fieldKey);
       this.setState({ unValidFields }, () => {
-        onValidateStateChanged && onValidateStateChanged({unValidFields, isValid: unValidFields.length < 1})
-      })
+        if (onValidateStateChanged) {
+          onValidateStateChanged({ unValidFields, isValid: unValidFields.length < 1 });
+        }
+      });
     } else {
-      unValidFields.push(fieldKey)
+      unValidFields.push(fieldKey);
       this.setState({ unValidFields }, () => {
-        onValidateStateChanged && onValidateStateChanged({unValidFields, isValid: false})
-      })
+        if (onValidateStateChanged) {
+          onValidateStateChanged({ unValidFields, isValid: false });
+        }
+      });
     }
   }
 
+  enableValidateField(field) {
+    const { validateType } = this.props;
+    const { focusFields, blurFields, changedFields } = this.state;
+    let displayValidState = false;
+    if (validateType === 'none') {
+      displayValidState = false;
+    } else if (validateType === 'all') {
+      displayValidState = true;
+    } else if (validateType === 'onFocus') {
+      displayValidState = focusFields[field.key];
+    } else if (validateType === 'onBlur') {
+      displayValidState = blurFields[field.key];
+    } else if (validateType === 'onChange') {
+      displayValidState = changedFields[field.key];
+    }
+    return displayValidState;
+  }
+
   renderField(field) {
-    const { data, requiredPrefix } = this.props
+    const { data, requiredPrefix } = this.props;
     return (
       <RenderField
         key={field.key}
@@ -111,18 +125,16 @@ class DocForm extends React.Component {
         toggleFileInclude={this.toggleFileInclude}
         requiredPrefix={requiredPrefix}
       />
-    )
+    );
   }
 
   renderFields() {
     const { fields } = this.props;
-    return fields.map(field => {
-      return this.renderField(field);
-    });
+    return fields.map(field => this.renderField(field));
   }
 
   render() {
-    return this.renderFields()
+    return this.renderFields();
   }
 }
 
@@ -140,8 +152,8 @@ DocForm.propTypes = {
   onChange: PropTypes.func.isRequired, // () => {key, value, isValid, initialValue, updateData, event, resParameters}
   onFocus: PropTypes.func, // () => {key, value, isValid, initialValue, event, resParameters}
   onBlur: PropTypes.func, // () => {key, value, isValid, initialValue, event, resParameters}
-  onValidateStateChanged:  PropTypes.func, // () => {unValidFields, isValid}
-  requiredPrefix:  PropTypes.string // *
+  onValidateStateChanged: PropTypes.func, // () => {unValidFields, isValid}
+  requiredPrefix: PropTypes.string // *
 };
 
 DocForm.defaultProps = {
@@ -154,3 +166,12 @@ DocForm.defaultProps = {
 
 
 export default DocForm;
+
+/* eslint func-names: 'off' */
+/* eslint linebreak-style: 'off' */
+/* eslint no-underscore-dangle: 'off' */
+/* eslint react/require-default-props: 'off' */
+/* eslint react/require-default-props: 'off' */
+/* eslint react/default-props-match-prop-types: 'off' */
+/* eslint react/forbid-prop-types: 'off' */
+/* eslint react/jsx-filename-extension: 'off' */

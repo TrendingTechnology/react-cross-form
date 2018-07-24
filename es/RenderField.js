@@ -4,21 +4,21 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _helpers = require('./helpers');
-
 var _validate = require('validate.js');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _propTypes = require('prop-types');
 
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _helpers = require('./helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -60,18 +60,18 @@ var RenderField = function (_React$PureComponent) {
           _onChange = _props.onChange,
           _onFocus = _props.onFocus,
           _onBlur = _props.onBlur,
-          displayValidState = _props.displayValidState,
-          required = _props.required,
-          fieldData = _props.fieldData,
-          resProps = _objectWithoutProperties(_props, ['field', 'data', 'onChange', 'onFocus', 'onBlur', 'displayValidState', 'required', 'fieldData']);
+          displayValidState = _props.displayValidState;
+      var validators = field.validators,
+          key = field.key,
+          component = field.component;
 
-      var InputElement = field.component;
-      var key = field.key;
-      var value = (0, _helpers.getFieldValue)(field, data, fieldData);
+      var InputElement = component;
+      var value = (0, _helpers.getFieldValue)(field, data);
       var validatorMessage = this.validateField(field, value);
       var _validatorMessage = displayValidState ? validatorMessage : null;
       var isValid = (0, _validate.isEmpty)(validatorMessage);
-      return _react2.default.createElement(InputElement, _extends({
+      var isRequired = validators && validators.presence;
+      return _react2.default.createElement(InputElement, {
         key: key,
         id: key,
         value: value,
@@ -87,9 +87,9 @@ var RenderField = function (_React$PureComponent) {
         displayValidState: displayValidState,
         isValid: isValid,
         validatorMessage: _validatorMessage,
-        required: required,
-        fieldData: fieldData
-      }, resProps, field));
+        required: isRequired,
+        field: field
+      });
     }
   }, {
     key: 'render',
@@ -104,72 +104,25 @@ var RenderField = function (_React$PureComponent) {
 exports.default = RenderField;
 
 
+RenderField.propTypes = process.env.NODE_ENV !== "production" ? {
+  onValidateStateChanged: _propTypes2.default.func,
+  field: _propTypes2.default.object,
+  data: _propTypes2.default.any,
+  onChange: _propTypes2.default.func,
+  onFocus: _propTypes2.default.func,
+  onBlur: _propTypes2.default.func,
+  displayValidState: _propTypes2.default.bool
+
+} : {};
 RenderField.defaultProps = {
   data: {}
-  /*
-  RenderField.defaultProps = {
-    onChange: () => {},
-    onFocus: () => {},
-    onActivateFinished: () => {},
-    onDeactivateFinished: () => {},
-    onPressForChangePointer: () => {},
-    validate: null,
-    label: 'objectId',
-    displayKey: 'objectId',
-    isShow: true,
-    showInputsErr: false,
-    objectId: null,
-    value: null,
-    source: null,
-    errorText: null,
-    requiredErrMes: null,
-    helperText: null,
-    isSecureTextEntry: false,
-    required: false,
-    disabled: false,
-    autoFocus: false,
-    pointer: null
-  };
-  RenderField.propTypes = {
-    type: PropTypes.oneOf([
-      'text',
-      'pointer',
-      'boolean',
-      'email',
-      'checkBox',
-      'MultiLineField',
-      'password'
-    ]).isRequired,
-    objectId: PropTypes.string,
-    onPressForChangePointer: PropTypes.func, // When user click on pointer field, this run with function for call back with data
-    displayKey: PropTypes.string, // text to show for pointer field, default is objectId
-    label: PropTypes.string,
-    value: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.object,
-      PropTypes.bool
-    ]),
-    source: PropTypes.string,
-    errorText: PropTypes.string,
-    requiredErrMes: PropTypes.string,
-    helperText: PropTypes.string,
-    onChange: PropTypes.func,
-    validate: PropTypes.func,
-    isShow: PropTypes.bool,
-    showInputsErr: PropTypes.bool,
-    isSecureTextEntry: PropTypes.bool,
-    required: PropTypes.bool,
-    autoFocus: PropTypes.bool,
-    onFocus: PropTypes.func,
-    disabled: PropTypes.bool,
-    onActivateFinished: PropTypes.func, // for Boolean only, run after Activate
-    onDeactivateFinished: PropTypes.func, // for Boolean only, run after Deactivate
-    pointer: PropTypes.objectOf({
-      schemaName: PropTypes.string,
-      dispalyKey: PropTypes.string,
-      valueKey: PropTypes.string
-    })
-  };
-  */
-
 };
+
+/* eslint func-names: 'off' */
+/* eslint linebreak-style: 'off' */
+/* eslint no-underscore-dangle: 'off' */
+/* eslint react/require-default-props: 'off' */
+/* eslint react/require-default-props: 'off' */
+/* eslint react/default-props-match-prop-types: 'off' */
+/* eslint react/forbid-prop-types: 'off' */
+/* eslint react/jsx-filename-extension: 'off' */
