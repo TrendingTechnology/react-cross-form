@@ -22,7 +22,7 @@ class RenderField extends React.PureComponent {
 
   renderFieldByType() {
     const {
-      field, data, onChange, onFocus, onBlur, displayValidState,
+      field, data, onChange, onFocus, onBlur, displayValidState, requiredPrefix
     } = this.props;
     const { validators, key, component } = field;
     const InputElement = component;
@@ -43,6 +43,7 @@ class RenderField extends React.PureComponent {
         isValid={isValid}
         validatorMessage={_validatorMessage}
         required={isRequired}
+        requiredPrefix={requiredPrefix}
         field={field}
       />
     );
@@ -61,6 +62,7 @@ RenderField.propTypes = {
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
   displayValidState: PropTypes.bool,
+  requiredPrefix: PropTypes.string,
 
 };
 RenderField.defaultProps = {
