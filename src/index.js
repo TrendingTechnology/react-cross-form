@@ -148,7 +148,7 @@ DocForm.propTypes = {
   fields: PropTypes.PropTypes.arrayOf(PropTypes.shape({
     key: PropTypes.string.isRequired, // firstName
     label: PropTypes.string.isRequired, // i18n('firstName')
-    component: PropTypes.node.isRequired, // TextInput
+    component: PropTypes.any.isRequired, // TextInput
     required: PropTypes.bool, // true
     disabled: PropTypes.bool, // false
     formatter: PropTypes.func, // () => {field , documentData}
