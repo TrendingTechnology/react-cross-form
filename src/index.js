@@ -23,7 +23,7 @@ class DocForm extends React.Component {
 
   onChange(res) {
     const {
-      key, value, isValid, event, ...resParameters
+      key, value, isValid, resParameters
     } = res;
     const { changedFields } = this.state;
     if (!changedFields[key]) {
@@ -33,13 +33,13 @@ class DocForm extends React.Component {
     const initialValue = this.fieldsInitialValue[key];
     const updateData = { ...this.props.data, [key]: value };
     this.props.onChange({
-      key, value, isValid, initialValue, updateData, event, resParameters
+      key, value, isValid, initialValue, updateData, resParameters
     });
   }
 
   onFocus(res) {
     const {
-      key, value, isValid, event, ...resParameters
+      key, value, isValid, esParameters
     } = res;
     const { focusFields } = this.state;
     const { onFocus } = this.props;
@@ -52,13 +52,13 @@ class DocForm extends React.Component {
     }
     const initialValue = this.fieldsInitialValue[key];
     onFocus && onFocus({
-      key, value, isValid, initialValue, event, resParameters
+      key, value, isValid, initialValue, resParameters
     });
   }
 
   onBlur(res) {
     const {
-      key, value, isValid, event, ...resParameters
+      key, value, isValid, resParameters
     } = res;
     const { blurFields } = this.state;
     const { onBlur } = this.props;
@@ -68,7 +68,7 @@ class DocForm extends React.Component {
     }
     const initialValue = this.fieldsInitialValue[key];
     onBlur && onBlur({
-      key, value, isValid, initialValue, event, resParameters
+      key, value, isValid, initialValue, resParameters
     });
   }
 
@@ -142,25 +142,28 @@ DocForm.propTypes = {
   data: PropTypes.object, // {firstName: 'David', age: 35}
   fields: PropTypes.PropTypes.arrayOf(PropTypes.shape({
     key: PropTypes.string.isRequired, // firstName
-    label: PropTypes.string.isRequired, // i18n('firstName')
-    component: PropTypes.element.isRequired, // TextInput
+    label: PropTypes.string.isRequired, // i18n('firstName')  
+    component: PropTypes.node.isRequired, // TextInput
     required: PropTypes.bool, // true
+    disabled: PropTypes.bool, // false
     formatter: PropTypes.func, // () => {field , documentData}
     validators: PropTypes.object, // { presence: true, email: true } // https://validatejs.org/#validators,
   })),
   validateType: PropTypes.oneOf(['none', 'all', 'onFocus', 'onBlur', 'onChange']),
-  onChange: PropTypes.func.isRequired, // () => {key, value, isValid, initialValue, updateData, event, resParameters}
-  onFocus: PropTypes.func, // () => {key, value, isValid, initialValue, event, resParameters}
-  onBlur: PropTypes.func, // () => {key, value, isValid, initialValue, event, resParameters}
+  onChange: PropTypes.func.isRequired, // () => {key, value, isValid, initialValue, updateData, resParameters}
+  onFocus: PropTypes.func, // () => {key, value, isValid, initialValue, resParameters}
+  onBlur: PropTypes.func, // () => {key, value, isValid, initialValue, resParameters}
   onValidateStateChanged: PropTypes.func, // () => {unValidFields, isValid}
-  requiredPrefix: PropTypes.string // *
+  requiredPrefix: PropTypes.string, // *
+  disabledAll: PropTypes.bool
 };
 
-DocForm.defaultProps = {
+DocForm.defaultProps = {  
   data: {},
   fields: [],
   validateType: 'all',
   requiredPrefix: '*',
+  disabledAll: false,
   onChange: () => console.warn('missing onChange')
 };
 

@@ -24,8 +24,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -63,9 +61,7 @@ var DocForm = function (_React$Component) {
       var key = res.key,
           value = res.value,
           isValid = res.isValid,
-          event = res.event,
-          resParameters = _objectWithoutProperties(res, ['key', 'value', 'isValid', 'event']);
-
+          resParameters = res.resParameters;
       var changedFields = this.state.changedFields;
 
       if (!changedFields[key]) {
@@ -75,7 +71,7 @@ var DocForm = function (_React$Component) {
       var initialValue = this.fieldsInitialValue[key];
       var updateData = _extends({}, this.props.data, _defineProperty({}, key, value));
       this.props.onChange({
-        key: key, value: value, isValid: isValid, initialValue: initialValue, updateData: updateData, event: event, resParameters: resParameters
+        key: key, value: value, isValid: isValid, initialValue: initialValue, updateData: updateData, resParameters: resParameters
       });
     }
   }, {
@@ -84,9 +80,7 @@ var DocForm = function (_React$Component) {
       var key = res.key,
           value = res.value,
           isValid = res.isValid,
-          event = res.event,
-          resParameters = _objectWithoutProperties(res, ['key', 'value', 'isValid', 'event']);
-
+          esParameters = res.esParameters;
       var focusFields = this.state.focusFields;
       var onFocus = this.props.onFocus;
 
@@ -99,7 +93,7 @@ var DocForm = function (_React$Component) {
       }
       var initialValue = this.fieldsInitialValue[key];
       onFocus && onFocus({
-        key: key, value: value, isValid: isValid, initialValue: initialValue, event: event, resParameters: resParameters
+        key: key, value: value, isValid: isValid, initialValue: initialValue, resParameters: resParameters
       });
     }
   }, {
@@ -108,9 +102,7 @@ var DocForm = function (_React$Component) {
       var key = res.key,
           value = res.value,
           isValid = res.isValid,
-          event = res.event,
-          resParameters = _objectWithoutProperties(res, ['key', 'value', 'isValid', 'event']);
-
+          resParameters = res.resParameters;
       var blurFields = this.state.blurFields;
       var onBlur = this.props.onBlur;
 
@@ -120,7 +112,7 @@ var DocForm = function (_React$Component) {
       }
       var initialValue = this.fieldsInitialValue[key];
       onBlur && onBlur({
-        key: key, value: value, isValid: isValid, initialValue: initialValue, event: event, resParameters: resParameters
+        key: key, value: value, isValid: isValid, initialValue: initialValue, resParameters: resParameters
       });
     }
   }, {
@@ -215,18 +207,20 @@ DocForm.propTypes = process.env.NODE_ENV !== "production" ? {
   data: _propTypes2.default.object, // {firstName: 'David', age: 35}
   fields: _propTypes2.default.PropTypes.arrayOf(_propTypes2.default.shape({
     key: _propTypes2.default.string.isRequired, // firstName
-    label: _propTypes2.default.string.isRequired, // i18n('firstName')
-    component: _propTypes2.default.element.isRequired, // TextInput
+    label: _propTypes2.default.string.isRequired, // i18n('firstName')  
+    component: _propTypes2.default.node.isRequired, // TextInput
     required: _propTypes2.default.bool, // true
+    disabled: _propTypes2.default.bool, // false
     formatter: _propTypes2.default.func, // () => {field , documentData}
     validators: _propTypes2.default.object // { presence: true, email: true } // https://validatejs.org/#validators,
   })),
   validateType: _propTypes2.default.oneOf(['none', 'all', 'onFocus', 'onBlur', 'onChange']),
-  onChange: _propTypes2.default.func.isRequired, // () => {key, value, isValid, initialValue, updateData, event, resParameters}
-  onFocus: _propTypes2.default.func, // () => {key, value, isValid, initialValue, event, resParameters}
-  onBlur: _propTypes2.default.func, // () => {key, value, isValid, initialValue, event, resParameters}
+  onChange: _propTypes2.default.func.isRequired, // () => {key, value, isValid, initialValue, updateData, resParameters}
+  onFocus: _propTypes2.default.func, // () => {key, value, isValid, initialValue, resParameters}
+  onBlur: _propTypes2.default.func, // () => {key, value, isValid, initialValue, resParameters}
   onValidateStateChanged: _propTypes2.default.func, // () => {unValidFields, isValid}
-  requiredPrefix: _propTypes2.default.string // *
+  requiredPrefix: _propTypes2.default.string, // *
+  disabledAll: _propTypes2.default.bool
 } : {};
 
 DocForm.defaultProps = {
@@ -234,6 +228,7 @@ DocForm.defaultProps = {
   fields: [],
   validateType: 'all',
   requiredPrefix: '*',
+  disabledAll: false,
   onChange: function onChange() {
     return console.warn('missing onChange');
   }

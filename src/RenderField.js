@@ -22,7 +22,8 @@ class RenderField extends React.PureComponent {
 
   renderFieldByType() {
     const {
-      field, data, onChange, onFocus, onBlur, displayValidState, requiredPrefix
+      field, data, onChange, onFocus, onBlur, displayValidState, requiredPrefix,
+      disabledAll
     } = this.props;
     const { validators, key, component } = field;
     const InputElement = component;
@@ -36,14 +37,15 @@ class RenderField extends React.PureComponent {
         key={key}
         id={key}
         value={value}
-        onFocus={() => onFocus({ key, value, isValid })}
-        onChange={(newVal) => { onChange({ key, value: newVal, isValid }); }}
-        onBlur={() => onBlur({ key, value, isValid })}
+        onFocus={(resParameters) => onFocus({ key, value, isValid, resParameters })}
+        onChange={(newVal, resParameters) => { onChange({ key, value: newVal, isValid, resParameters }); }}
+        onBlur={(resParameters) => onBlur({ key, value, isValid, resParameters })}
         displayValidState={displayValidState}
         isValid={isValid}
         validatorMessage={_validatorMessage}
         required={isRequired}
         requiredPrefix={requiredPrefix}
+        disabled={field.disabled || disabledAll}
         field={field}
       />
     );
@@ -63,6 +65,7 @@ RenderField.propTypes = {
   onBlur: PropTypes.func,
   displayValidState: PropTypes.bool,
   requiredPrefix: PropTypes.string,
+  disabledAll: PropTypes.bool
 
 };
 RenderField.defaultProps = {
