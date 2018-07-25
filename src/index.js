@@ -39,7 +39,7 @@ class DocForm extends React.Component {
 
   onFocus(res) {
     const {
-      key, value, isValid, esParameters
+      key, value, isValid, resParameters
     } = res;
     const { focusFields } = this.state;
     const { onFocus } = this.props;
@@ -48,12 +48,14 @@ class DocForm extends React.Component {
       this.setState({ focusFields });
     }
     if (this.fieldsInitialValue[key] === undefined) {
-      this.fieldsInitialValue[key] !== value;
+      this.fieldsInitialValue[key] = value;
     }
     const initialValue = this.fieldsInitialValue[key];
-    onFocus && onFocus({
-      key, value, isValid, initialValue, resParameters
-    });
+    if (onFocus) {
+      onFocus({
+        key, value, isValid, initialValue, resParameters
+      });
+    }
   }
 
   onBlur(res) {
@@ -67,9 +69,11 @@ class DocForm extends React.Component {
       this.setState({ blurFields });
     }
     const initialValue = this.fieldsInitialValue[key];
-    onBlur && onBlur({
-      key, value, isValid, initialValue, resParameters
-    });
+    if (onBlur) {
+      onBlur({
+        key, value, isValid, initialValue, resParameters
+      });
+    }
   }
 
   onValidateStateChanged(fieldKey, isValid) {
@@ -143,7 +147,7 @@ DocForm.propTypes = {
   data: PropTypes.object, // {firstName: 'David', age: 35}
   fields: PropTypes.PropTypes.arrayOf(PropTypes.shape({
     key: PropTypes.string.isRequired, // firstName
-    label: PropTypes.string.isRequired, // i18n('firstName')  
+    label: PropTypes.string.isRequired, // i18n('firstName')
     component: PropTypes.node.isRequired, // TextInput
     required: PropTypes.bool, // true
     disabled: PropTypes.bool, // false
@@ -161,7 +165,7 @@ DocForm.propTypes = {
   disabledAll: PropTypes.bool
 };
 
-DocForm.defaultProps = {  
+DocForm.defaultProps = {
   data: {},
   fields: [],
   validateType: 'all',
