@@ -42,8 +42,8 @@ var RenderField = function (_React$PureComponent) {
 
   _createClass(RenderField, [{
     key: 'validateField',
-    value: function validateField(field, value) {
-      var validatorMessage = (0, _helpers.getFieldValidatorMessage)(field, value);
+    value: function validateField(field, value, data) {
+      var validatorMessage = field.customValidation ? field.customValidation(field, value, data) : (0, _helpers.getFieldValidatorMessage)(field, value);
       var isValid = (0, _validate.isEmpty)(validatorMessage);
       if (isValid !== this.isFieldValid) {
         this.isFieldValid = isValid;
@@ -65,12 +65,11 @@ var RenderField = function (_React$PureComponent) {
           disabledAll = _props.disabledAll;
       var validators = field.validators,
           key = field.key,
-          component = field.component,
-          customValidation = field.customValidation;
+          component = field.component;
 
       var InputElement = component;
       var value = (0, _helpers.getFieldValue)(field, data);
-      var validatorMessage = customValidation ? customValidation(field, value, data) : this.validateField(field, value);
+      var validatorMessage = this.validateField(field, value, data);
       var isValid = (0, _validate.isEmpty)(validatorMessage);
       var isRequired = validators && validators.presence;
       return _react2.default.createElement(InputElement, {

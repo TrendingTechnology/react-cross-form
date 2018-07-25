@@ -10,8 +10,8 @@ class RenderField extends React.PureComponent {
     this.validateField = this.validateField.bind(this);
     this.isFieldValid = true;
   }
-  validateField(field, value) {
-    const validatorMessage = getFieldValidatorMessage(field, value);
+  validateField(field, value, data) {
+    const validatorMessage = field.customValidation ? field.customValidation(field, value, data) : getFieldValidatorMessage(field, value);
     const isValid = isEmpty(validatorMessage);
     if (isValid !== this.isFieldValid) {
       this.isFieldValid = isValid;
@@ -25,10 +25,10 @@ class RenderField extends React.PureComponent {
       field, data, onChange, onFocus, onBlur, displayValidState, requiredPrefix,
       disabledAll
     } = this.props;
-    const { validators, key, component, customValidation } = field;
+    const { validators, key, component } = field;
     const InputElement = component;
     const value = getFieldValue(field, data);
-    const validatorMessage = customValidation ? customValidation(field, value, data) : this.validateField(field, value);
+    const validatorMessage = this.validateField(field, value, data);
     const isValid = isEmpty(validatorMessage);
     const isRequired = validators && validators.presence;
     return (

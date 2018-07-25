@@ -1,6 +1,6 @@
 {
   "name": "react-cross-form",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Easy form for react and react-native with validation base validate.js",
   "main": "lib/index.js",
   "scripts": {
