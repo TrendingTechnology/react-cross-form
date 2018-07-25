@@ -25,11 +25,10 @@ class RenderField extends React.PureComponent {
       field, data, onChange, onFocus, onBlur, displayValidState, requiredPrefix,
       disabledAll
     } = this.props;
-    const { validators, key, component } = field;
+    const { validators, key, component, customValidation } = field;
     const InputElement = component;
     const value = getFieldValue(field, data);
-    const validatorMessage = this.validateField(field, value);
-    const _validatorMessage = displayValidState ? validatorMessage : null;
+    const validatorMessage = customValidation ? customValidation(field, value, data) : this.validateField(field, value);
     const isValid = isEmpty(validatorMessage);
     const isRequired = validators && validators.presence;
     return (
@@ -37,12 +36,21 @@ class RenderField extends React.PureComponent {
         key={key}
         id={key}
         value={value}
-        onFocus={(resParameters) => onFocus({ key, value, isValid, resParameters })}
-        onChange={(newVal, resParameters) => { onChange({ key, value: newVal, isValid, resParameters }); }}
-        onBlur={(resParameters) => onBlur({ key, value, isValid, resParameters })}
+        onFocus={resParameters => onFocus({
+          key, value, isValid, resParameters
+          })
+        }
+        onChange={(newVal, resParameters) => onChange({
+          key, value: newVal, isValid, resParameters
+          })
+        }
+        onBlur={resParameters => onBlur({
+            key, value, isValid, resParameters
+          })
+        }
         displayValidState={displayValidState}
         isValid={isValid}
-        validatorMessage={_validatorMessage}
+        validatorMessage={validatorMessage}
         required={isRequired}
         requiredPrefix={requiredPrefix}
         disabled={field.disabled || disabledAll}
@@ -66,7 +74,6 @@ RenderField.propTypes = {
   displayValidState: PropTypes.bool,
   requiredPrefix: PropTypes.string,
   disabledAll: PropTypes.bool
-
 };
 RenderField.defaultProps = {
   data: {}

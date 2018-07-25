@@ -43,7 +43,11 @@ formatter: PropTypes.func, // () => {field , documentData}
 
 validators: PropTypes.object, // { presence: true, email: true } // https://validatejs.org/#validators,
 
-placeholde: PropTypes.string,
+customValidation: PropTypes.function
+// custom validation: You can pass a function that calls with (field, value, document Data) and return an array of strings, each string is an error of the input, example ['minimum is 4 ', 'must be a number']
+
+placeholder: PropTypes.string,
+
 
 // And you can add here everything and your field will get this object
 

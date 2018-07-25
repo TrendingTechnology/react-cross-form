@@ -167,7 +167,8 @@ var DocForm = function (_React$Component) {
     value: function renderField(field) {
       var _props = this.props,
           data = _props.data,
-          requiredPrefix = _props.requiredPrefix;
+          requiredPrefix = _props.requiredPrefix,
+          disabledAll = _props.disabledAll;
 
       return _react2.default.createElement(_RenderField2.default, {
         key: field.key,
@@ -179,7 +180,8 @@ var DocForm = function (_React$Component) {
         onValidateStateChanged: this.onValidateStateChanged,
         displayValidState: this.enableValidateField(field),
         toggleFileInclude: this.toggleFileInclude,
-        requiredPrefix: requiredPrefix
+        requiredPrefix: requiredPrefix,
+        disabledAll: disabledAll
       });
     }
   }, {
@@ -212,7 +214,9 @@ DocForm.propTypes = process.env.NODE_ENV !== "production" ? {
     required: _propTypes2.default.bool, // true
     disabled: _propTypes2.default.bool, // false
     formatter: _propTypes2.default.func, // () => {field , documentData}
-    validators: _propTypes2.default.object // { presence: true, email: true } // https://validatejs.org/#validators,
+    validators: _propTypes2.default.object, // { presence: true, email: true } // https://validatejs.org/#validators,
+    customValidation: _propTypes2.default.function, // { field, value, data } need to return array of string
+    placeholder: _propTypes2.default.string
   })),
   validateType: _propTypes2.default.oneOf(['none', 'all', 'onFocus', 'onBlur', 'onChange']),
   onChange: _propTypes2.default.func.isRequired, // () => {key, value, isValid, initialValue, updateData, resParameters}

@@ -111,7 +111,7 @@ class DocForm extends React.Component {
   }
 
   renderField(field) {
-    const { data, requiredPrefix } = this.props;
+    const { data, requiredPrefix, disabledAll } = this.props;
     return (
       <RenderField
         key={field.key}
@@ -124,6 +124,7 @@ class DocForm extends React.Component {
         displayValidState={this.enableValidateField(field)}
         toggleFileInclude={this.toggleFileInclude}
         requiredPrefix={requiredPrefix}
+        disabledAll={disabledAll}
       />
     );
   }
@@ -148,6 +149,8 @@ DocForm.propTypes = {
     disabled: PropTypes.bool, // false
     formatter: PropTypes.func, // () => {field , documentData}
     validators: PropTypes.object, // { presence: true, email: true } // https://validatejs.org/#validators,
+    customValidation: PropTypes.function, // { field, value, data } need to return array of string
+    placeholder: PropTypes.string
   })),
   validateType: PropTypes.oneOf(['none', 'all', 'onFocus', 'onBlur', 'onChange']),
   onChange: PropTypes.func.isRequired, // () => {key, value, isValid, initialValue, updateData, resParameters}

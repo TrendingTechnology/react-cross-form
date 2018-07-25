@@ -65,12 +65,12 @@ var RenderField = function (_React$PureComponent) {
           disabledAll = _props.disabledAll;
       var validators = field.validators,
           key = field.key,
-          component = field.component;
+          component = field.component,
+          customValidation = field.customValidation;
 
       var InputElement = component;
       var value = (0, _helpers.getFieldValue)(field, data);
-      var validatorMessage = this.validateField(field, value);
-      var _validatorMessage = displayValidState ? validatorMessage : null;
+      var validatorMessage = customValidation ? customValidation(field, value, data) : this.validateField(field, value);
       var isValid = (0, _validate.isEmpty)(validatorMessage);
       var isRequired = validators && validators.presence;
       return _react2.default.createElement(InputElement, {
@@ -78,17 +78,23 @@ var RenderField = function (_React$PureComponent) {
         id: key,
         value: value,
         onFocus: function onFocus(resParameters) {
-          return _onFocus({ key: key, value: value, isValid: isValid, resParameters: resParameters });
+          return _onFocus({
+            key: key, value: value, isValid: isValid, resParameters: resParameters
+          });
         },
         onChange: function onChange(newVal, resParameters) {
-          _onChange({ key: key, value: newVal, isValid: isValid, resParameters: resParameters });
+          return _onChange({
+            key: key, value: newVal, isValid: isValid, resParameters: resParameters
+          });
         },
         onBlur: function onBlur(resParameters) {
-          return _onBlur({ key: key, value: value, isValid: isValid, resParameters: resParameters });
+          return _onBlur({
+            key: key, value: value, isValid: isValid, resParameters: resParameters
+          });
         },
         displayValidState: displayValidState,
         isValid: isValid,
-        validatorMessage: _validatorMessage,
+        validatorMessage: validatorMessage,
         required: isRequired,
         requiredPrefix: requiredPrefix,
         disabled: field.disabled || disabledAll,
@@ -118,7 +124,6 @@ RenderField.propTypes = process.env.NODE_ENV !== "production" ? {
   displayValidState: _propTypes2.default.bool,
   requiredPrefix: _propTypes2.default.string,
   disabledAll: _propTypes2.default.bool
-
 } : {};
 RenderField.defaultProps = {
   data: {}
