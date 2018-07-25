@@ -1,4 +1,5 @@
 
+
 # React cross Form
 
 Easy form for React and react-native with validation base validate.js
@@ -52,7 +53,26 @@ placeholder: PropTypes.string,
 // And you can add here everything and your field will get this object
 
 ```
+### customValidation exmple
+```jsx
+import { isValidNumber } from  'libphonenumber-js'
 
+const  formFields  = [
+{
+	key: 'mobile',
+	label: i18n.t('Mobile'),
+	component: MobileInput,
+	customValidation : function (field, value){
+		let  errors  = []
+		if(value  ===  ''){
+			errors.push('can\'t be blank')
+		} else  if(!isValidNumber(value)){
+			errors.push('Please enter a valid phone number')
+			}
+			return  errors
+	}}
+]
+```
   
 
 ### validate type
