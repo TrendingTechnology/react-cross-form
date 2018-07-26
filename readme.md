@@ -1,9 +1,9 @@
 
-
 # React cross Form
 
-Easy form for React and react-native with validation base validate.js
-This is a form that renders your inputs with validation.
+Easy form for React and react-native app with validation.
+We use the great [validate.js](https://validatejs.org/) library but you can use a custom validator.
+Inputs didn't include, we just render your inputs but we help you with validation and the flow of the form with focus next input out of the box.
 
 ### Demo
 [![Edit 4j2pj699q7](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/4j2pj699q7)
@@ -24,56 +24,86 @@ npm i react-cross-form --save
 | data | object|The document data |
 | fields| array| Array of fileds to render. see [Field object](#field-object) for more details.
 | validateType| string| ``` 'none' | 'all' | 'onFocus' | 'onBlur' | 'onChange' ``` see [Validate Type](#validate-type) for more details.
-|onFocus, onChange(required), onBlur|function| Functions that gets called by input events. Function recieves object, see [Input event](#input-event) for more details.|
+|showSkippingFieldsWarnings|boolean|Set true if you want to display validation error even if user skip on the input|
+|onFocus, onChange(required), onBlur|function| Functions that gets called by input events. Function recieves an object, see [Input event](#input-event) for more details.|
 |onValidateStateChanged|function| Functions that gets called when the validation state was changed |
-|requiredPrefix|string|default is *|
+|requiredPrefix|string|Default is '*'|
 |disabledAll|boolean|Set true if you want to disable all fields|
+|focusNext|boolean|Set true if you want to focus on the next input.(don't forget ti pass the inout ref, us this.props.onRef)|
+|enableOpenPickerOnFocusNext|boolean|Some of the input are modal or dropdown, in this case, you can enable this option and we will open this modal for you,  you need to pass on the onRef an object with an openPicker method, you can do something like that [open picker example](#open-picker-example)|
+|focusNextOnlyIfEmpty|boolean|Set true if you want to focus on the next input only if is empty| 
 ### Field object
 
+|key |type|info |
+|---|---|---|
+|key|string(required)|Key of for the value in the data
+|component|element(required)|Any component that you want to render, see what your componant will get [Component props](#component-props)|
+|formatter|function|If you want to format the value, you can pass a function the received (field, documentData) and return the input value|
+|validators|object|For example: { presence: true, email: true }, you can learn more in https://validatejs.org/#validators and see [More validate examples](#validate.js-examples))|
+|disabled|boolean| Input disabled value|
+|placeholder|string| Input placeholder value|
+|label|string| Input label value
 ```jsx
-
-key: PropTypes.string.isRequired, // firstName
-
-label: PropTypes.string.isRequired, // i18n('firstName')
-
-component: PropTypes.element.isRequired, // TextInput
-
-required: PropTypes.bool, // true
-
-formatter: PropTypes.func, // () => {field , documentData}
-
-validators: PropTypes.object, // { presence: true, email: true } // https://validatejs.org/#validators,
-
-customValidation: PropTypes.function
-// custom validation: You can pass a function that calls with (field, value, document Data) and return an array of strings, each string is an error of the input, example ['minimum is 4 ', 'must be a number']
-
-placeholder: PropTypes.string,
-
-
-// And you can add here everything and your field will get this object
-
-```
-### customValidation exmple
-```jsx
-import { isValidNumber } from  'libphonenumber-js'
-
-const  formFields  = [
-{
-	key: 'mobile',
-	label: i18n.t('Mobile'),
-	component: MobileInput,
-	customValidation : function (field, value){
-		let  errors  = []
-		if(value  ===  ''){
-			errors.push('can\'t be blank')
-		} else  if(!isValidNumber(value)){
-			errors.push('Please enter a valid phone number')
+// fields example
+import  DocForm  from  'react-cross-form'
+import TextInput from  './TextInput'
+....
+return (
+	<DocForm
+		data={{firstName: ''}}
+		fields={[
+			{
+				key:  'firstName',
+				label:  i18n.t('First Name'),
+				component:  TextInput,
+				validators: { presence:  true, length: { minimum:  2 }},
+				autoFocus:  true
+				// And you can add here everything and your field will get this as props
 			}
-			return  errors
-	}}
-]
+		]}
+)
 ```
-  
+* [CustomValidation exmple](#customvalidation-exmple)
+
+
+
+ ### Component props
+  ```jsx
+  class MyInput extends React.Component {
+  render() {
+	  const {
+		  id, // the field.key
+		  value, // input value
+		  onFocus, // function
+		  onChange, // function
+		  onBlur, // function
+		  isValid, // bollean
+		  showWarnings, // bollean
+		  validatorMessage, // array of errors
+		  required, // bollean
+		  placeholder, // string
+		  label, // string
+		  disabled, // bollean
+		  autoFocus, // bollean
+		  requiredPrefix, // string
+		  onRef // function
+		  // and all the rest from your field config
+	  } = this.props
+	  const _requiredPrefix = required ? requiredPrefix : ''
+	  return (
+		<div>
+			<label>{_requiredPrefix }{label}</label>
+			<input
+				value={value}
+				onFocus={onFocus}
+				onChange={e => onChange(e.target.value)}
+				onBlur={onBlur}
+				disabled={disabled}
+			/>	
+			{showWarnings && <p>{validatorMessage}</p>}
+		</div>
+	)
+  ```
 
 ### validate type
 
@@ -94,7 +124,7 @@ This will handle the visibility of the error state in each input when to show th
   
   
 
-### validate.js
+### Validate.js examples
 
 validate.js is great and simple solution
 
@@ -131,12 +161,12 @@ There are 3 events that will pass to your inputs:
 
 | input side | input side(event) | parent side(callback)|
 |--|--|--|
-|onFocus|Just run the funtion , you didn't need to pass any value|Your callback will get {key, value, isValid, initialValue, resParameters}
-|onChanged|onChange(value)|Your callback will get {key, value, isValid, initialValue, updateData, resParameters}
-|onBlur|Just run the funtion , you didn't need to pass any value|Your callback will get {key, value, isValid, initialValue, updateData, resParameters}
+|onFocus|Just run the funtion , you didn't need to pass any value|Your callback will get {key, value, isValid, initialValue, info}
+|onChanged|onChange(value)|Your callback will get {key, value, isValid, initialValue, updateData, info}
+|onBlur|Just run the funtion , you didn't need to pass any value|Your callback will get {key, value, isValid, initialValue, updateData, info}
 
-*resParameters - you can pass to call back any parameters you want, when you call onBlur or onFocus this is the first value, you can do something like that onBlue({userName: 'Dan', event: e}) and the perent can find this when inside callback params, when you call onCahnge, the restParameters is the second , onChange(value, {userName: 'Dan', event: e}) 
-The parent needs to handle these events, the onChanged is required.
+*info- you can pass to call back any parameters you want, when you call onBlur or onFocus this is the first value, you can do something like that onBlue({userName: 'Dan', event: e}) and the perent can find this when inside callback params, when you call onCahnge, the info is the second , onChange(value, {userName: 'Dan', event: e}) 
+
 
 ## Parent call backs example
 
@@ -206,3 +236,54 @@ react-cross-form will handle all your input needs:
 - The parent will know about all the fields with error
 
 - Each input will get validator message and flag if we want to display this message or not
+
+### customValidation exmple
+```jsx
+import { isValidNumber } from  'libphonenumber-js'
+
+const  formFields  = [
+{
+	key: 'mobile',
+	label: i18n.t('Mobile'),
+	component: MobileInput,
+	customValidation : function (field, value){
+		let  errors  = []
+		if(value  ===  ''){
+			errors.push('can\'t be blank')
+		} else  if(!isValidNumber(value)){
+			errors.push('Please enter a valid phone number')
+			}
+			return  errors
+	}}
+]
+```
+### open picker example
+```jsx
+export  default  class  CountryChooser  extends  React.Component {
+	constructor(props){
+		super(props)
+		this.state={
+			showPicker: false
+		}
+		this.openPicker = this.openPicker .bind(this)
+	}
+
+	openPicker (){
+		this.setState({showPicker: true})
+	}
+
+	render() {
+		const onRef= this.props.onRef;
+		return (
+	        <CountryPicker
+		      showPicker={this.state.showPicker}
+		      openPicker ={this.openPicker}
+	          ref={(ref) => {
+	            if(onRef && ref){
+	              onRef({root: ref, openPicker: this.openPicker })
+	            }
+	          }}
+.
+.
+.
+```			

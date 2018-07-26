@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import isEmpty from 'lodash/isEmpty';
 import RenderField from './RenderField';
+import { getFieldValue } from './helpers';
 
 class DocForm extends React.Component {
   constructor(props) {
@@ -18,7 +20,10 @@ class DocForm extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.enableValidateField = this.enableValidateField.bind(this);
     this.onValidateStateChanged = this.onValidateStateChanged.bind(this);
+    this.getAllPerviousFields = this.getAllPerviousFields.bind(this);
+    this.onRef = this.onRef.bind(this);
     this.fieldsInitialValue = {};
+    this.inputsRef = {};
   }
 
   onChange(res) {
@@ -26,13 +31,18 @@ class DocForm extends React.Component {
       key, value, isValid, resParameters
     } = res;
     const { changedFields } = this.state;
-    if (!changedFields[key]) {
-      changedFields[key] = true;
-      this.setState({ changedFields });
+    let _changedFields = { ...changedFields };
+    const { onChange, showSkippingFieldsWarnings } = this.props;
+    if (!_changedFields[key]) {
+      _changedFields[key] = true;
+      if (showSkippingFieldsWarnings) {
+        _changedFields = { ..._changedFields, ...this.getAllPerviousFields(key) };
+      }
+      this.setState({ changedFields: _changedFields });
     }
     const initialValue = this.fieldsInitialValue[key];
     const updateData = { ...this.props.data, [key]: value };
-    this.props.onChange({
+    onChange({
       key, value, isValid, initialValue, updateData, resParameters
     });
   }
@@ -42,10 +52,14 @@ class DocForm extends React.Component {
       key, value, isValid, resParameters
     } = res;
     const { focusFields } = this.state;
-    const { onFocus } = this.props;
-    if (!focusFields[key]) {
-      focusFields[key] = true;
-      this.setState({ focusFields });
+    const { onFocus, showSkippingFieldsWarnings } = this.props;
+    let _focusFields = { ...focusFields };
+    if (!_focusFields[key]) {
+      _focusFields[key] = true;
+      if (showSkippingFieldsWarnings) {
+        _focusFields = { ..._focusFields, ...this.getAllPerviousFields(key) };
+      }
+      this.setState({ focusFields: _focusFields });
     }
     if (this.fieldsInitialValue[key] === undefined) {
       this.fieldsInitialValue[key] = value;
@@ -58,21 +72,47 @@ class DocForm extends React.Component {
     }
   }
 
-  onBlur(res) {
+  onBlur(res, position) {
     const {
       key, value, isValid, resParameters
     } = res;
     const { blurFields } = this.state;
-    const { onBlur } = this.props;
+    let _blurFields = { ...blurFields };
+    const {
+      onBlur, showSkippingFieldsWarnings, focusNext,
+      enableOpenPickerOnFocusNext, focusNextOnlyIfEmpty, data, fields
+    } = this.props;
     if (!blurFields[key]) {
-      blurFields[key] = true;
-      this.setState({ blurFields });
+      _blurFields[key] = true;
+      if (showSkippingFieldsWarnings) {
+        _blurFields = { ..._blurFields, ...this.getAllPerviousFields(key) };
+      }
+      this.setState({ blurFields: _blurFields });
     }
     const initialValue = this.fieldsInitialValue[key];
     if (onBlur) {
       onBlur({
         key, value, isValid, initialValue, resParameters
       });
+    }
+    if (focusNext) {
+      const nextField = position + 1;
+      if (this.inputsRef[nextField] &&
+          (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)
+      ) {
+        let enabledNext = true;
+        if (focusNextOnlyIfEmpty) {
+          const nextFieldValue = getFieldValue(fields[nextField], data);
+          enabledNext = isEmpty(nextFieldValue);
+        }
+        if (enabledNext && this.inputsRef[nextField].focus) {
+          this.inputsRef[nextField].focus();
+        } else if (enabledNext && enableOpenPickerOnFocusNext) {
+          this.inputsRef[nextField].openPicker();
+        }
+      } else if (this.props.fields.length >= (nextField + 1)) {
+        console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+      }
     }
   }
 
@@ -96,28 +136,50 @@ class DocForm extends React.Component {
     }
   }
 
+  onRef(ref, position) {
+    this.inputsRef[position] = ref;
+  }
+
+  getAllPerviousFields(key) {
+    const { fields } = this.props;
+    const perviousFields = {};
+    let stopProcess = false;
+    let keyToCheck = 0;
+    while (!stopProcess) {
+      if (fields[keyToCheck].key === key) {
+        stopProcess = true;
+      } else {
+        perviousFields[fields[keyToCheck].key] = true;
+      }
+      keyToCheck += 1;
+    }
+    return perviousFields;
+  }
+
   enableValidateField(field) {
     const { validateType } = this.props;
     const { focusFields, blurFields, changedFields } = this.state;
-    let displayValidState = false;
+    let showWarnings = false;
     if (validateType === 'none') {
-      displayValidState = false;
+      showWarnings = false;
     } else if (validateType === 'all') {
-      displayValidState = true;
+      showWarnings = true;
     } else if (validateType === 'onFocus') {
-      displayValidState = focusFields[field.key];
+      showWarnings = focusFields[field.key];
     } else if (validateType === 'onBlur') {
-      displayValidState = blurFields[field.key];
+      showWarnings = blurFields[field.key];
     } else if (validateType === 'onChange') {
-      displayValidState = changedFields[field.key];
+      showWarnings = changedFields[field.key];
     }
-    return displayValidState;
+    return showWarnings;
   }
 
-  renderField(field) {
+  renderField(field, index) {
     const { data, requiredPrefix, disabledAll } = this.props;
     return (
       <RenderField
+        onRef={this.onRef}
+        position={index}
         key={field.key}
         field={field}
         data={data}
@@ -125,8 +187,7 @@ class DocForm extends React.Component {
         onFocus={this.onFocus}
         onBlur={this.onBlur}
         onValidateStateChanged={this.onValidateStateChanged}
-        displayValidState={this.enableValidateField(field)}
-        toggleFileInclude={this.toggleFileInclude}
+        showWarnings={this.enableValidateField(field)}
         requiredPrefix={requiredPrefix}
         disabledAll={disabledAll}
       />
@@ -135,7 +196,7 @@ class DocForm extends React.Component {
 
   renderFields() {
     const { fields } = this.props;
-    return fields.map(field => this.renderField(field));
+    return fields.map((field, index) => this.renderField(field, index));
   }
 
   render() {
@@ -157,12 +218,16 @@ DocForm.propTypes = {
     placeholder: PropTypes.string
   })),
   validateType: PropTypes.oneOf(['none', 'all', 'onFocus', 'onBlur', 'onChange']),
-  onChange: PropTypes.func.isRequired, // () => {key, value, isValid, initialValue, updateData, resParameters}
-  onFocus: PropTypes.func, // () => {key, value, isValid, initialValue, resParameters}
-  onBlur: PropTypes.func, // () => {key, value, isValid, initialValue, resParameters}
+  onChange: PropTypes.func.isRequired, // {key, value,isValid, initialValue, updateData, info}
+  onFocus: PropTypes.func, // () => {key, value, isValid, initialValue, info}
+  onBlur: PropTypes.func, // () => {key, value, isValid, initialValue, info}
   onValidateStateChanged: PropTypes.func, // () => {unValidFields, isValid}
   requiredPrefix: PropTypes.string, // *
-  disabledAll: PropTypes.bool
+  disabledAll: PropTypes.bool,
+  focusNext: PropTypes.bool,
+  enableOpenPickerOnFocusNext: PropTypes.bool,
+  focusNextOnlyIfEmpty: PropTypes.bool,
+  showSkippingFieldsWarnings: PropTypes.bool
 };
 
 DocForm.defaultProps = {
