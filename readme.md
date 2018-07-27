@@ -169,12 +169,9 @@ This will handle the visibility of the error state in each input, decide when to
 	)
   ```
 
-<<<<<<< HEAD
 ### FocusNext 
 Your input will get focusNext funciton, in react native [onSubmitEditing](https://facebook.github.io/react-native/docs/textinput#onsubmitediting) is a good place to run focusNext, in react you can use onKeyPress={e => if(e.key === 'Enter') {focusNext ()}}
 focus next need a ref from all of your inputs, run ref={ref => {this.props.onRef(ref)}}
-=======
->>>>>>> a51bcec1fe5820c5b14e30af357326ecd4ab799d
   
 
 ### validators examples
