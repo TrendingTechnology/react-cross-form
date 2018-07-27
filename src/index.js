@@ -17,6 +17,7 @@ class DocForm extends React.Component {
     this.renderField = this.renderField.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
+    this.focusNext = this.focusNext.bind(this);
     this.onChange = this.onChange.bind(this);
     this.enableValidateField = this.enableValidateField.bind(this);
     this.onValidateStateChanged = this.onValidateStateChanged.bind(this);
@@ -72,15 +73,14 @@ class DocForm extends React.Component {
     }
   }
 
-  onBlur(res, position) {
+  onBlur(res) {
     const {
       key, value, isValid, resParameters
     } = res;
     const { blurFields } = this.state;
     let _blurFields = { ...blurFields };
     const {
-      onBlur, showSkippingFieldsWarnings, focusNext,
-      enableOpenPickerOnFocusNext, focusNextOnlyIfEmpty, data, fields
+      onBlur, showSkippingFieldsWarnings
     } = this.props;
     if (!blurFields[key]) {
       _blurFields[key] = true;
@@ -95,26 +95,8 @@ class DocForm extends React.Component {
         key, value, isValid, initialValue, resParameters
       });
     }
-    if (focusNext) {
-      const nextField = position + 1;
-      if (this.inputsRef[nextField] &&
-          (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)
-      ) {
-        let enabledNext = true;
-        if (focusNextOnlyIfEmpty) {
-          const nextFieldValue = getFieldValue(fields[nextField], data);
-          enabledNext = isEmpty(nextFieldValue);
-        }
-        if (enabledNext && this.inputsRef[nextField].focus) {
-          this.inputsRef[nextField].focus();
-        } else if (enabledNext && enableOpenPickerOnFocusNext) {
-          this.inputsRef[nextField].openPicker();
-        }
-      } else if (this.props.fields.length >= (nextField + 1)) {
-        console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
-      }
-    }
   }
+
 
   onValidateStateChanged(fieldKey, isValid) {
     let { unValidFields } = this.state;
@@ -156,6 +138,30 @@ class DocForm extends React.Component {
     return perviousFields;
   }
 
+  focusNext(res, position) {
+    const { key } = res;
+    const {
+      enableOpenPickerOnFocusNext, focusNextOnlyIfEmpty, data, fields
+    } = this.props;
+    const nextField = position + 1;
+    if (this.inputsRef[nextField] &&
+          (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)
+    ) {
+      let enabledNext = true;
+      if (focusNextOnlyIfEmpty) {
+        const nextFieldValue = getFieldValue(fields[nextField], data);
+        enabledNext = isEmpty(nextFieldValue);
+      }
+      if (enabledNext && this.inputsRef[nextField].focus) {
+        this.inputsRef[nextField].focus();
+      } else if (enabledNext && enableOpenPickerOnFocusNext) {
+        this.inputsRef[nextField].openPicker();
+      }
+    } else if (this.props.fields.length >= (nextField + 1)) {
+      console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+    }
+  }
+
   enableValidateField(field) {
     const { validateType } = this.props;
     const { focusFields, blurFields, changedFields } = this.state;
@@ -190,6 +196,7 @@ class DocForm extends React.Component {
         showWarnings={this.enableValidateField(field)}
         requiredPrefix={requiredPrefix}
         disabledAll={disabledAll}
+        focusNext={this.focusNext}
       />
     );
   }

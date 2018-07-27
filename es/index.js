@@ -54,6 +54,7 @@ var DocForm = function (_React$Component) {
     _this.renderField = _this.renderField.bind(_this);
     _this.onFocus = _this.onFocus.bind(_this);
     _this.onBlur = _this.onBlur.bind(_this);
+    _this.focusNext = _this.focusNext.bind(_this);
     _this.onChange = _this.onChange.bind(_this);
     _this.enableValidateField = _this.enableValidateField.bind(_this);
     _this.onValidateStateChanged = _this.onValidateStateChanged.bind(_this);
@@ -123,7 +124,7 @@ var DocForm = function (_React$Component) {
     }
   }, {
     key: 'onBlur',
-    value: function onBlur(res, position) {
+    value: function onBlur(res) {
       var key = res.key,
           value = res.value,
           isValid = res.isValid,
@@ -133,12 +134,7 @@ var DocForm = function (_React$Component) {
       var _blurFields = _extends({}, blurFields);
       var _props3 = this.props,
           onBlur = _props3.onBlur,
-          showSkippingFieldsWarnings = _props3.showSkippingFieldsWarnings,
-          focusNext = _props3.focusNext,
-          enableOpenPickerOnFocusNext = _props3.enableOpenPickerOnFocusNext,
-          focusNextOnlyIfEmpty = _props3.focusNextOnlyIfEmpty,
-          data = _props3.data,
-          fields = _props3.fields;
+          showSkippingFieldsWarnings = _props3.showSkippingFieldsWarnings;
 
       if (!blurFields[key]) {
         _blurFields[key] = true;
@@ -152,23 +148,6 @@ var DocForm = function (_React$Component) {
         onBlur({
           key: key, value: value, isValid: isValid, initialValue: initialValue, resParameters: resParameters
         });
-      }
-      if (focusNext) {
-        var nextField = position + 1;
-        if (this.inputsRef[nextField] && (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)) {
-          var enabledNext = true;
-          if (focusNextOnlyIfEmpty) {
-            var nextFieldValue = (0, _helpers.getFieldValue)(fields[nextField], data);
-            enabledNext = (0, _isEmpty2.default)(nextFieldValue);
-          }
-          if (enabledNext && this.inputsRef[nextField].focus) {
-            this.inputsRef[nextField].focus();
-          } else if (enabledNext && enableOpenPickerOnFocusNext) {
-            this.inputsRef[nextField].openPicker();
-          }
-        } else if (this.props.fields.length >= nextField + 1) {
-          console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
-        }
       }
     }
   }, {
@@ -219,6 +198,32 @@ var DocForm = function (_React$Component) {
       return perviousFields;
     }
   }, {
+    key: 'focusNext',
+    value: function focusNext(res, position) {
+      var key = res.key;
+      var _props4 = this.props,
+          enableOpenPickerOnFocusNext = _props4.enableOpenPickerOnFocusNext,
+          focusNextOnlyIfEmpty = _props4.focusNextOnlyIfEmpty,
+          data = _props4.data,
+          fields = _props4.fields;
+
+      var nextField = position + 1;
+      if (this.inputsRef[nextField] && (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)) {
+        var enabledNext = true;
+        if (focusNextOnlyIfEmpty) {
+          var nextFieldValue = (0, _helpers.getFieldValue)(fields[nextField], data);
+          enabledNext = (0, _isEmpty2.default)(nextFieldValue);
+        }
+        if (enabledNext && this.inputsRef[nextField].focus) {
+          this.inputsRef[nextField].focus();
+        } else if (enabledNext && enableOpenPickerOnFocusNext) {
+          this.inputsRef[nextField].openPicker();
+        }
+      } else if (this.props.fields.length >= nextField + 1) {
+        console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+      }
+    }
+  }, {
     key: 'enableValidateField',
     value: function enableValidateField(field) {
       var validateType = this.props.validateType;
@@ -244,10 +249,10 @@ var DocForm = function (_React$Component) {
   }, {
     key: 'renderField',
     value: function renderField(field, index) {
-      var _props4 = this.props,
-          data = _props4.data,
-          requiredPrefix = _props4.requiredPrefix,
-          disabledAll = _props4.disabledAll;
+      var _props5 = this.props,
+          data = _props5.data,
+          requiredPrefix = _props5.requiredPrefix,
+          disabledAll = _props5.disabledAll;
 
       return _react2.default.createElement(_RenderField2.default, {
         onRef: this.onRef,
@@ -261,7 +266,8 @@ var DocForm = function (_React$Component) {
         onValidateStateChanged: this.onValidateStateChanged,
         showWarnings: this.enableValidateField(field),
         requiredPrefix: requiredPrefix,
-        disabledAll: disabledAll
+        disabledAll: disabledAll,
+        focusNext: this.focusNext
       });
     }
   }, {

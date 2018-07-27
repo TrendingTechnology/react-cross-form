@@ -98,7 +98,7 @@ class RenderField extends React.PureComponent {
   renderFieldByType() {
     const {
       field, data, showWarnings, requiredPrefix,
-      disabledAll
+      disabledAll, focusNext
     } = this.props;
     const {
       validators, key, component, ...resField
@@ -123,6 +123,7 @@ class RenderField extends React.PureComponent {
         required={isRequired}
         requiredPrefix={requiredPrefix}
         disabled={field.disabled || disabledAll}
+        focusNext={focusNext}
       />
     );
   }
@@ -141,6 +142,7 @@ RenderField.propTypes = {
   onChange: PropTypes.func,
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
+  focusNext: PropTypes.func,
   showWarnings: PropTypes.bool,
   requiredPrefix: PropTypes.string,
   disabledAll: PropTypes.bool
