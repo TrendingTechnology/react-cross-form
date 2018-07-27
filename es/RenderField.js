@@ -18,11 +18,11 @@ var _propTypes = require('prop-types');
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _helpers = require('./helpers');
-
 var _isEqual = require('lodash/isEqual');
 
 var _isEqual2 = _interopRequireDefault(_isEqual);
+
+var _helpers = require('./helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52,6 +52,7 @@ var RenderField = function (_React$PureComponent) {
     _this.onChange = _this.onChange.bind(_this);
     _this.onRef = _this.onRef.bind(_this);
     _this.isFieldValid = _this.isFieldValid.bind(_this);
+    _this.focusNext = _this.focusNext.bind(_this);
     _this.lastIsFieldValid = true;
     _this.lastValidatorMessage = null;
     return _this;
@@ -135,6 +136,16 @@ var RenderField = function (_React$PureComponent) {
       }, position);
     }
   }, {
+    key: 'focusNext',
+    value: function focusNext() {
+      var _props6 = this.props,
+          field = _props6.field,
+          position = _props6.position;
+      var key = field.key;
+
+      this.props.focusNext(key, position);
+    }
+  }, {
     key: 'isFieldValid',
     value: function isFieldValid() {
       return (0, _validate.isEmpty)(this.state.validatorMessage);
@@ -154,13 +165,13 @@ var RenderField = function (_React$PureComponent) {
   }, {
     key: 'renderFieldByType',
     value: function renderFieldByType() {
-      var _props6 = this.props,
-          field = _props6.field,
-          data = _props6.data,
-          showWarnings = _props6.showWarnings,
-          requiredPrefix = _props6.requiredPrefix,
-          disabledAll = _props6.disabledAll,
-          focusNext = _props6.focusNext;
+      var _props7 = this.props,
+          field = _props7.field,
+          data = _props7.data,
+          showWarnings = _props7.showWarnings,
+          requiredPrefix = _props7.requiredPrefix,
+          disabledAll = _props7.disabledAll,
+          focusNext = _props7.focusNext;
 
       var validators = field.validators,
           key = field.key,
@@ -185,7 +196,7 @@ var RenderField = function (_React$PureComponent) {
         required: isRequired,
         requiredPrefix: requiredPrefix,
         disabled: field.disabled || disabledAll,
-        focusNext: focusNext
+        focusNext: this.focusNext
       }));
     }
   }, {

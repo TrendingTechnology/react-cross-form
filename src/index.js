@@ -138,8 +138,7 @@ class DocForm extends React.Component {
     return perviousFields;
   }
 
-  focusNext(res, position) {
-    const { key } = res;
+  focusNext(key, position) {
     const {
       enableOpenPickerOnFocusNext, focusNextOnlyIfEmpty, data, fields
     } = this.props;

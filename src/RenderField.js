@@ -1,8 +1,8 @@
 import React from 'react';
 import { isEmpty } from 'validate.js';
 import PropTypes from 'prop-types';
-import { getFieldValue, getFieldValidatorMessage } from './helpers';
 import isEqual from 'lodash/isEqual';
+import { getFieldValue, getFieldValidatorMessage } from './helpers';
 
 class RenderField extends React.PureComponent {
   constructor(props) {
@@ -17,6 +17,7 @@ class RenderField extends React.PureComponent {
     this.onChange = this.onChange.bind(this);
     this.onRef = this.onRef.bind(this);
     this.isFieldValid = this.isFieldValid.bind(this);
+    this.focusNext = this.focusNext.bind(this);
     this.lastIsFieldValid = true;
     this.lastValidatorMessage = null;
   }
@@ -76,6 +77,12 @@ class RenderField extends React.PureComponent {
     }, position);
   }
 
+  focusNext() {
+    const { field, position } = this.props;
+    const { key } = field;
+    this.props.focusNext(key, position);
+  }
+
   isFieldValid() {
     return isEmpty(this.state.validatorMessage);
   }
@@ -123,7 +130,7 @@ class RenderField extends React.PureComponent {
         required={isRequired}
         requiredPrefix={requiredPrefix}
         disabled={field.disabled || disabledAll}
-        focusNext={focusNext}
+        focusNext={this.focusNext}
       />
     );
   }

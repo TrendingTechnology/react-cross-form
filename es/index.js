@@ -199,8 +199,7 @@ var DocForm = function (_React$Component) {
     }
   }, {
     key: 'focusNext',
-    value: function focusNext(res, position) {
-      var key = res.key;
+    value: function focusNext(key, position) {
       var _props4 = this.props,
           enableOpenPickerOnFocusNext = _props4.enableOpenPickerOnFocusNext,
           focusNextOnlyIfEmpty = _props4.focusNextOnlyIfEmpty,
