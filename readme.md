@@ -8,15 +8,18 @@ We use the great [validate.js](https://validatejs.org/) library but you can use 
 
 This is only a logic component,  `react-cross-form` just render your inputs with value, methods, validators...
 
+![Alt Text](https://github.com/doronnahum/react-cross-form/blob/master/20180728_202923.gif)
+
 ![
 ](https://lh3.googleusercontent.com/ynNkdib6pclcQ30h2r73Jyv6jvf3G0fyE9maW0eDSsxA0OnKl-LFVwzGeprUHerGbTKFErc8pQ8-1g "demo")
 
 ### Demo
 
-[react native demo - with Expo and react-native-elements](https://snack.expo.io/@doronn/react-cross-form)
-![enter image description here](https://lh3.googleusercontent.com/TTMJgko-rnRu7bMPXVfFe-c0mS8maW8KCkX2U4pRE2EwLpZ-9D1uS6Dib-SBcycrh_zq--hY8Z5kHA "expo")
-
-[react demo with regular html input](https://codesandbox.io/s/4j2pj699q7)
+[react native demo - with Expo and react-native-elements](https://snack.expo.io/@doronn/react-cross-form)<br />
+[
+![enter image description here](https://lh3.googleusercontent.com/Lvr6DiHkvC282Y455QPIxGn04T1caVqsneCVGFlsW8NmeMgZysRlWsPivJSe4t610J0Jmu-zeA3nVQ "expo")
+](https://snack.expo.io/@doronn/react-cross-form)
+[react demo with regular html input](https://codesandbox.io/s/4j2pj699q7)<br />
 [![Edit 4j2pj699q7](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/4j2pj699q7)
 
 
@@ -306,4 +309,3 @@ const  formFields  = [
 ## Dependencies
 -	isEmpty/lodash
 -	validate.js
-
