@@ -136,50 +136,64 @@ const FIELDS = [{
  ----
  This exmple with all this props that input will get from `react-cross-form`
   ```jsx
-  class MyInput extends React.Component {
+import React from 'react';
 
-	onKeyPress (e) => {
-		if(e.key === ‘Enter’){
-			this.props.onNext()
-		}
-	}
+export default class MyInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this.onKeyPress = this.onKeyPress.bind(this);
+  }
+
+  onKeyPress(e) {
+    if (e.key === 'Enter') {
+      this.props.onNext();
+    }
+  }
 
   render() {
-	  const {
-		  id, // the field.key
-		  value, // input value
-		  onFocus, // function
-		  onChange, // function
-		  onBlur, // function
-		  isValid, // bollean
-		  showWarnings, // bollean
-		  validatorMessage, // array of errors
-		  required, // bollean
-		  placeholder, // string
-		  label, // string
-		  disabled, // bollean
-		  autoFocus, // bollean
-		  requiredPrefix, // string
-		  onRef, // function
-		  focusNext // function (Run to focus on the next input)
-		  // and all the rest from your field config
-	  } = this.props
-	  const _requiredPrefix = required ? requiredPrefix : ''
-	  return (
-		<div>
-			<label>{_requiredPrefix }{label}</label>
-			<input
-				ref={ref => {onRef = ref}}
-				value={value}
-				onFocus={onFocus}
-				onChange={e => onChange(e.target.value)}
-				onBlur={onBlur}
-				disabled={disabled}
-				onKeyPress={this.onKeyPress}
-			/>	
-			{showWarnings && <p>{validatorMessage}</p>}
-		</div>
-	)
+    const {
+      id, // the field.key
+      value, // input value
+      onFocus, // function
+      onChange, // function
+      onBlur, // function
+      isValid, // bollean
+      showWarnings, // bollean
+      validatorMessage, // array of errors
+      required, // bollean
+      placeholder, // string
+      label, // string
+      disabled, // bollean
+      autoFocus, // bollean
+      requiredPrefix, // string
+      onRef, // function
+      focusNext // function (Run to focus on the next input)
+      // and all the rest from your field config
+    } = this.props;
+    const _requiredPrefix = required ? requiredPrefix : '';
+    return (
+      <div>
+        <label>
+          {_requiredPrefix}
+          {label}
+        </label>
+        <input
+          ref={ref => {
+            onRef(ref);
+          }}
+          value={value}
+          onFocus={onFocus}
+          onChange={e => onChange(e.target.value)}
+          onBlur={onBlur}
+          disabled={disabled}
+          onKeyPress={this.onKeyPress}
+        />
+        {showWarnings && <p>{validatorMessage}</p>}
+      </div>
+    );
+  }
+}
+
   ```
 
 ### FocusNext
