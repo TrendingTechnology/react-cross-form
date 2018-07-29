@@ -80,7 +80,6 @@ export default class Example extends React.Component {
           onValidateStateChanged={({ isValid }) => {
             this.setState({ isFormValid: isValid });
           }}
-          focusNext={true}
         />
       </div>
     );
