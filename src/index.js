@@ -29,7 +29,7 @@ class DocForm extends React.Component {
 
   onChange(res) {
     const {
-      key, value, isValid, resParameters
+      key, value, isValid, info
     } = res;
     const { changedFields } = this.state;
     let _changedFields = { ...changedFields };
@@ -44,13 +44,13 @@ class DocForm extends React.Component {
     const initialValue = this.fieldsInitialValue[key];
     const updateData = { ...this.props.data, [key]: value };
     onChange({
-      key, value, isValid, initialValue, updateData, resParameters
+      key, value, isValid, initialValue, updateData, info
     });
   }
 
   onFocus(res) {
     const {
-      key, value, isValid, resParameters
+      key, value, isValid, info
     } = res;
     const { focusFields } = this.state;
     const { onFocus, showSkippingFieldsWarnings } = this.props;
@@ -62,20 +62,20 @@ class DocForm extends React.Component {
       }
       this.setState({ focusFields: _focusFields });
     }
-    if (this.fieldsInitialValue[key] === undefined) {
-      this.fieldsInitialValue[key] = value;
-    }
+
+    this.fieldsInitialValue[key] = value;
+
     const initialValue = this.fieldsInitialValue[key];
     if (onFocus) {
       onFocus({
-        key, value, isValid, initialValue, resParameters
+        key, value, isValid, initialValue, info
       });
     }
   }
 
   onBlur(res) {
     const {
-      key, value, isValid, resParameters
+      key, value, isValid, info
     } = res;
     const { blurFields } = this.state;
     let _blurFields = { ...blurFields };
@@ -92,7 +92,7 @@ class DocForm extends React.Component {
     const initialValue = this.fieldsInitialValue[key];
     if (onBlur) {
       onBlur({
-        key, value, isValid, initialValue, resParameters
+        key, value, isValid, initialValue, info
       });
     }
   }
