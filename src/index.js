@@ -99,7 +99,7 @@ class DocForm extends React.Component {
 
 
   onValidateStateChanged(fieldKey, isValid) {
-    let { unValidFields } = this.state;
+    let unValidFields = [...this.state.unValidFields];
     const { onValidateStateChanged } = this.props;
     if (isValid) {
       unValidFields = unValidFields.filter(field => field !== fieldKey);
@@ -230,7 +230,6 @@ DocForm.propTypes = {
   onValidateStateChanged: PropTypes.func, // () => {unValidFields, isValid}
   requiredPrefix: PropTypes.string, // *
   disabledAll: PropTypes.bool,
-  focusNext: PropTypes.bool,
   enableOpenPickerOnFocusNext: PropTypes.bool,
   focusNextOnlyIfEmpty: PropTypes.bool,
   showSkippingFieldsWarnings: PropTypes.bool

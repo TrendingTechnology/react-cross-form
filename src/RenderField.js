@@ -105,7 +105,7 @@ class RenderField extends React.PureComponent {
   renderFieldByType() {
     const {
       field, data, showWarnings, requiredPrefix,
-      disabledAll, focusNext
+      disabledAll
     } = this.props;
     const {
       validators, key, component, ...resField
