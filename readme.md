@@ -146,7 +146,7 @@ export default class MyInput extends React.Component {
 
   onKeyPress(e) {
     if (e.key === 'Enter') {
-      this.props.onNext();
+      this.props.focusNext();
     }
   }
 
@@ -200,7 +200,7 @@ export default class MyInput extends React.Component {
 Your input will get focusNext funciton from props.<br /><br /> react native - use inside  [onSubmitEditing](https://facebook.github.io/react-native/docs/textinput#onsubmitediting) 
 ```
 <TextInput 
-	onSubmitEditing={this.props.onNext}
+	onSubmitEditing={this.props.focusNext}
 ```
 <br />react -  use inside [onKeyPress](https://reactjs.org/docs/events.html#keyboard-events)
 ```
