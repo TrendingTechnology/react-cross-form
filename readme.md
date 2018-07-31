@@ -1,10 +1,13 @@
 
 
+
 # React cross Form
 
 Easy form for react and react-native apps with validation.
 
 We use the great [validate.js](https://validatejs.org/) library but you can use a custom validator.
+
+Optional - You can use [react-cross-inputs](https://github.com/doronnahum/react-cross-inputs) , [Example with react cross inputs](#example-with-react-cross-inputs)
 
 This is only a logic component,  `react-cross-form` just render your inputs with value, methods, validators...
 
@@ -319,6 +322,92 @@ const  formFields  = [
 	}}
 ]
 ```
+
+## Example with react cross inputs
+```jsx
+import { isValidNumber } from  'libphonenumber-js'
+import {TextInput, NumberInput, MobileInput, UploadFile, DateTime, Pointer, DropDown, ObjectsDropDown} from 'react-cross-inputs';
+
+const DocFields = [
+  {
+    key: 'firstName',
+    label: 'First Name',
+    validators: { presence: true, length: { minimum: 2 } },
+    component: TextInput,
+
+  },
+  {
+    key: 'lastName',
+    label: 'Last Name',
+    validators: { presence: true, length: { minimum: 2 } },
+    component: TextInput,
+  },
+  {
+    key: 'mobile',
+    label: 'Mobile',
+    customValidation: function (field, value) {
+      let errors = []
+      if(!value || value === '') {
+        errors.push('can\'t be blank')
+      } else if(!isValidNumber(value)) {
+        errors.push('Please enter a valid phone number')
+      }
+      return errors
+    },
+    component: MobileInput,
+  },
+  {
+    key: 'image',
+    label: 'Image',
+    component: UploadFile,
+    validators: { presence: true }
+  },
+  {
+    key: 'age',
+    label: 'Age',
+    component: NumberInput,
+  },
+  {
+    key: 'birthday',
+    label: 'Birthday',
+    component: DateTime,
+  },
+  {
+    key: 'city',
+    label: 'City',
+    component: Pointer,
+    schemaName: 'City',
+    targetName: 'CityDropDown',
+    labelKey: 'name'
+  },
+  {
+    key: 'favoriteColor',
+    label: 'Favorite Color',
+    component: DropDown,
+    options: [
+      {key: 'red', label: 'red'},
+      {key: 'green', label: 'green'},
+      {key: 'blue', label: 'blue'},
+      {key: 'yellow', label: 'yellow'},
+      {key: 'pink', label: 'pink', customRender: ({label}) => <p style={{color: 'pink'}}>{label}</p>},
+    ]
+  },
+  {
+    key: 'favoritePhone',
+    label: 'Favorite Phone',
+    component: ObjectsDropDown,
+    valueKey: 'model', // default is key
+    labelKey: 'fullName', // default is label
+    options: [
+      {company: 'Samsung', OS: 'Android 8', model: 'Galaxy S9 Plus', fullName: 'Samsung Galaxy S9 Plus'},
+      {company: 'Samsung', OS: 'Android 8', model: 'Galaxy S9', fullName: 'Samsung Galaxy S9'},
+      {company: 'Huawei', OS: 'Android 8.1', model: 'P20 Pro', fullName: 'Huawei P20 Pro'},
+    ]
+  }
+ ]
+```
+The result of this exmple is:
+![enter image description here](https://lh3.googleusercontent.com/dRilh59u-9LrXofk-NSkr-QV-DDALE7xmmo66W73vpFLbfe5DS0oa0yRRGcoFkzgmdAF0FgoWfdm1A "react-cross-inputs")
 ## Dependencies
 -	isEmpty/lodash
 -	validate.js
