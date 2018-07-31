@@ -253,7 +253,8 @@ var DocForm = function (_React$Component) {
       var _props5 = this.props,
           data = _props5.data,
           requiredPrefix = _props5.requiredPrefix,
-          disabledAll = _props5.disabledAll;
+          disabledAll = _props5.disabledAll,
+          fieldsOptions = _props5.fieldsOptions;
 
       return _react2.default.createElement(_RenderField2.default, {
         onRef: this.onRef,
@@ -268,7 +269,8 @@ var DocForm = function (_React$Component) {
         showWarnings: this.enableValidateField(field),
         requiredPrefix: requiredPrefix,
         disabledAll: disabledAll,
-        focusNext: this.focusNext
+        focusNext: this.focusNext,
+        options: fieldsOptions[field.key]
       });
     }
   }, {
@@ -314,11 +316,13 @@ DocForm.propTypes = process.env.NODE_ENV !== "production" ? {
   disabledAll: _propTypes2.default.bool,
   enableOpenPickerOnFocusNext: _propTypes2.default.bool,
   focusNextOnlyIfEmpty: _propTypes2.default.bool,
-  showSkippingFieldsWarnings: _propTypes2.default.bool
+  showSkippingFieldsWarnings: _propTypes2.default.bool,
+  fieldsOptions: _propTypes2.default.object // you can pass your inputs an object with options, key for each data is field.key
 } : {};
 
 DocForm.defaultProps = {
   data: {},
+  fieldsOptions: {},
   fields: [],
   validateType: 'all',
   requiredPrefix: '*',

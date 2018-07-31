@@ -180,7 +180,7 @@ class DocForm extends React.Component {
   }
 
   renderField(field, index) {
-    const { data, requiredPrefix, disabledAll } = this.props;
+    const { data, requiredPrefix, disabledAll, fieldsOptions } = this.props;
     return (
       <RenderField
         onRef={this.onRef}
@@ -196,6 +196,7 @@ class DocForm extends React.Component {
         requiredPrefix={requiredPrefix}
         disabledAll={disabledAll}
         focusNext={this.focusNext}
+        options={fieldsOptions[field.key]}
       />
     );
   }
@@ -232,11 +233,13 @@ DocForm.propTypes = {
   disabledAll: PropTypes.bool,
   enableOpenPickerOnFocusNext: PropTypes.bool,
   focusNextOnlyIfEmpty: PropTypes.bool,
-  showSkippingFieldsWarnings: PropTypes.bool
+  showSkippingFieldsWarnings: PropTypes.bool,
+  fieldsOptions: PropTypes.object // you can pass your inputs an object with options, key for each data is field.key
 };
 
 DocForm.defaultProps = {
   data: {},
+  fieldsOptions: {},
   fields: [],
   validateType: 'all',
   requiredPrefix: '*',

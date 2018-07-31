@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
@@ -25,6 +27,8 @@ var _isEqual2 = _interopRequireDefault(_isEqual);
 var _helpers = require('./helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
@@ -53,6 +57,7 @@ var RenderField = function (_React$PureComponent) {
     _this.onRef = _this.onRef.bind(_this);
     _this.isFieldValid = _this.isFieldValid.bind(_this);
     _this.focusNext = _this.focusNext.bind(_this);
+    _this.onKeyPress = _this.onKeyPress.bind(_this);
     _this.lastIsFieldValid = true;
     _this.lastValidatorMessage = null;
     return _this;
@@ -136,6 +141,17 @@ var RenderField = function (_React$PureComponent) {
       }, position);
     }
   }, {
+    key: 'onKeyPress',
+    value: function onKeyPress(e) {
+      if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object' && e.key) {
+        if (e.key === 'Enter') {
+          this.focusNext();
+        } else {
+          console.error('react-cross-form - nextOnKeyPress methods need an onKeyPress, input event, https://reactjs.org/docs/events.html#keyboard-events ');
+        }
+      }
+    }
+  }, {
     key: 'focusNext',
     value: function focusNext() {
       var _props6 = this.props,
@@ -165,6 +181,8 @@ var RenderField = function (_React$PureComponent) {
   }, {
     key: 'renderFieldByType',
     value: function renderFieldByType() {
+      var _extends2;
+
       var _props7 = this.props,
           field = _props7.field,
           data = _props7.data,
@@ -175,28 +193,36 @@ var RenderField = function (_React$PureComponent) {
       var validators = field.validators,
           key = field.key,
           component = field.component,
-          resField = _objectWithoutProperties(field, ['validators', 'key', 'component']);
+          options = field.options,
+          label = field.label,
+          placeholder = field.placeholder,
+          resField = _objectWithoutProperties(field, ['validators', 'key', 'component', 'options', 'label', 'placeholder']);
 
       var InputElement = component;
       var value = (0, _helpers.getFieldValue)(field, data);
       var isValid = this.isFieldValid();
       var isRequired = validators && validators.presence;
-      return _react2.default.createElement(InputElement, _extends({}, resField, {
-        onRef: this.onRef,
+      if (this.props.options && field.options) {
+        console.warn('react-cross-form - it seem the parent pass an options and you pass options with field configuration, you can find field.options as fieldOptions');
+      }
+      var _required = isRequired && requiredPrefix ? requiredPrefix : "";
+      return _react2.default.createElement(InputElement, _extends((_extends2 = {
         key: key,
-        id: key,
-        value: value,
-        onFocus: this.onFocus,
-        onBlur: this.onBlur,
-        onChange: this.onChange,
-        showWarnings: showWarnings,
-        isValid: isValid,
-        validatorMessage: this.state.validatorMessage,
-        required: isRequired,
-        requiredPrefix: requiredPrefix,
+        id: key
+        // input attributes
+        , value: value,
         disabled: field.disabled || disabledAll,
+        label: '' + _required + label,
+        placeholder: placeholder
+        // events
+        , onFocus: this.onFocus,
+        onBlur: this.onBlur,
+        onChange: this.onChange
+        // callback that help to focus nextField
+        , onRef: this.onRef,
+        onKeyPress: this.onKeyPress,
         focusNext: this.focusNext
-      }));
+      }, _defineProperty(_extends2, 'onKeyPress', this.onKeyPress), _defineProperty(_extends2, 'showWarnings', showWarnings), _defineProperty(_extends2, 'isValid', isValid), _defineProperty(_extends2, 'validatorMessage', this.state.validatorMessage), _defineProperty(_extends2, 'required', isRequired), _defineProperty(_extends2, 'validateStatus', showWarnings ? isValid ? 'success' : "error" : null), _defineProperty(_extends2, 'options', this.props.options || options), _defineProperty(_extends2, 'fieldOptions', this.props.options ? options : null), _extends2), resField));
     }
   }, {
     key: 'render',

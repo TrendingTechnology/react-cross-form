@@ -18,6 +18,7 @@ class RenderField extends React.PureComponent {
     this.onRef = this.onRef.bind(this);
     this.isFieldValid = this.isFieldValid.bind(this);
     this.focusNext = this.focusNext.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
     this.lastIsFieldValid = true;
     this.lastValidatorMessage = null;
   }
@@ -77,6 +78,15 @@ class RenderField extends React.PureComponent {
     }, position);
   }
 
+  onKeyPress(e) {
+    if(typeof e === 'object' && e.key){
+        if (e.key === 'Enter') { this.focusNext();
+    }else{
+      console.error('react-cross-form - nextOnKeyPress methods need an onKeyPress, input event, https://reactjs.org/docs/events.html#keyboard-events ')
+    }
+  }
+  }
+
   focusNext() {
     const { field, position } = this.props;
     const { key } = field;
@@ -108,29 +118,45 @@ class RenderField extends React.PureComponent {
       disabledAll
     } = this.props;
     const {
-      validators, key, component, ...resField
+      validators, key, component, options, label, placeholder, ...resField
     } = field;
     const InputElement = component;
     const value = getFieldValue(field, data);
     const isValid = this.isFieldValid();
     const isRequired = validators && validators.presence;
+    if(this.props.options && field.options){
+      console.warn('react-cross-form - it seem the parent pass an options and you pass options with field configuration, you can find field.options as fieldOptions')
+    }
+    const _required = (isRequired && requiredPrefix) ? requiredPrefix : "";
     return (
       <InputElement
-        {...resField}
-        onRef={this.onRef}
         key={key}
         id={key}
+        // input attributes
         value={value}
+        disabled={field.disabled || disabledAll}
+        label={`${_required}${label}`}
+        placeholder={placeholder}
+        // events
         onFocus={this.onFocus}
         onBlur={this.onBlur}
         onChange={this.onChange}
+        // callback that help to focus nextField
+        onRef={this.onRef}
+        onKeyPress={this.onKeyPress}
+        focusNext={this.focusNext}
+        onKeyPress={this.onKeyPress}
+        // validators
         showWarnings={showWarnings}
         isValid={isValid}
         validatorMessage={this.state.validatorMessage}
         required={isRequired}
-        requiredPrefix={requiredPrefix}
-        disabled={field.disabled || disabledAll}
-        focusNext={this.focusNext}
+        validateStatus={showWarnings ? (isValid ? 'success': "error") : null}
+        // options for dropdowns
+        options={this.props.options || options}
+        fieldOptions={this.props.options ? options : null}
+        // The rest of the field configuration
+        {...resField}
       />
     );
   }
