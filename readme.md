@@ -104,7 +104,8 @@ export default class Example extends React.Component {
 |onValidateStateChanged|function| Function that get called when the form validation state was changed, With this value you can enable/disable the form submit button|
 |requiredPrefix|string <br/><small><small>(Default is * )</small></samll>|You can use this to render input label with a required fields labels will render with '*' at the start of the string|
 |disabledAll|boolean|Set true if you want to disable all fields|
-|focusNextOnlyIfEmpty|boolean|Set true if you want to focus on the next input only if is empty| 
+|focusNextOnlyIfEmpty|boolean|Set true if you want to focus on the next input only if is empty|
+|render|fonction|if you want to customize the layout, for example, you want to wrapper any input with other element or put between the inputs some other element, you can use render props function that will get  an object with all the inputs and return the view to render|
 
 
 ### Fields
@@ -122,6 +123,7 @@ more info about field object:
 |disabled|boolean| Input disabled value|
 |placeholder|string| Input placeholder value|
 |label|string| Input label value
+|helpText|string| Sometimes we want to render help text under the field
 
 ### Fields configuration example
 ```jsx
@@ -165,21 +167,20 @@ export default class MyInput extends React.Component {
       validatorMessage, // array of errors
       required, // bollean
       placeholder, // string
-      label, // string
+      label, // string,
+      requiredPrefix, // string
+      labelWithPrefix, //string
       disabled, // bollean
       autoFocus, // bollean
       requiredPrefix, // string
       onRef, // function
       focusNext // function (Run to focus on the next input)
+      getOtherFieldRefByKey// function that return other field ref by the field key
       // and all the rest from your field config
     } = this.props;
-    const _requiredPrefix = required ? requiredPrefix : '';
     return (
       <div>
-        <label>
-          {_requiredPrefix}
-          {label}
-        </label>
+        <label> {labelWithPrefix} </label>
         <input
           ref={ref => {
             onRef(ref);
@@ -408,6 +409,85 @@ const DocFields = [
 ```
 The result of this exmple is:
 ![enter image description here](https://lh3.googleusercontent.com/dRilh59u-9LrXofk-NSkr-QV-DDALE7xmmo66W73vpFLbfe5DS0oa0yRRGcoFkzgmdAF0FgoWfdm1A "react-cross-inputs")
+
+# Complex uses
+ ### 1- Group number of inputs to one componet
+ ```javascript
+ const FIELDS = [
+ {
+	key: 'email',
+	label: 'Email',
+	component: TextInput
+},
+{
+	group: [
+		{
+			key: 'firstName',
+			label: 'FirstName',
+			component: TextInput
+		},
+		{
+			key: 'lastName',
+			label: 'LastName',
+			component: TextInput
+		},
+	],
+		component: FullNameComponent
+	}
+]
+ ```
+In this example FullNameComponent will get props with a object call inputsGroup that include the firstName and lastName component as a function that return the comoponent, you can run the function with props that you eant to pass to the input,
+see FullNameComponent as a group component example:
+```jsx
+import React from 'react';
+
+export default class FullNameComponent extends React.Component {
+  render() {
+    const {inputsGroup} = this.props
+    return (
+      <div>
+        {inputsGroup.firstName({style: {color: 'red'}})}
+        {inputsGroup.lastName()}
+      </div>
+    )
+  }
+}
+
+```
+### 2 - Get ref of other field and change is value
+Sometimes you want to enable value changing in what value to trigger a change in another field, for this case you can get from any input the ref of another input and run is props.change with the value
+Example:
+In this example AddressAutoComplete is a component with a dropdown of countries, when we select an option we get address and coordinates.
+We want to achieve an update in the location input.
+We pass in the field config onSelect function that called when user select address from the dropdown, the input will call the onSelect with the option and the input props, one of the props is the getOtherFieldRefByKey function.
+we call getOtherFieldRefByKey from the input props and get the refs to location input and is parent.
+in this example we use the parent props, the parent is the wrapper of the location input, we call the onChange with the new coordinates.
+```javascript
+ const FIELDS = [
+  {
+    key: 'address',
+    label: 'Address',
+    component: AddressAutoComplete,
+    onSelect: (option, props) => {
+      const coordinates = option.geometry.coordinates
+      let locationRefs = props.getOtherFieldRefByKey('location')
+      const {input, parent} = locationRefs
+	  parent.props.onChange({
+          __type: 'GeoPoint',
+          latitude: coordinates[1],
+          longitude: coordinates[0]
+        });
+    },
+    accessToken: envConfig.MAP_BOX_ACCESS_TOKEN
+  },
+  {
+    key: 'location',
+    label: 'Location',
+    component: GeoLocationMapView,
+    accessToken: envConfig.MAP_BOX_ACCESS_TOKEN
+  },
+]
+```
 ## Dependencies
 -	isEmpty/lodash
 -	validate.js
