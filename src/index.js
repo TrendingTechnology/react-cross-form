@@ -23,8 +23,12 @@ class DocForm extends React.Component {
     this.onValidateStateChanged = this.onValidateStateChanged.bind(this);
     this.getAllPerviousFields = this.getAllPerviousFields.bind(this);
     this.onRef = this.onRef.bind(this);
+    this.getOtherFieldRefByKey = this.getOtherFieldRefByKey.bind(this);
+    this.onRefRenderField = this.onRefRenderField.bind(this);
     this.fieldsInitialValue = {};
     this.inputsRef = {};
+    this.renderFieldsRef = {};
+    this.inputPositionByKey = {}
   }
 
   onChange(res) {
@@ -97,7 +101,6 @@ class DocForm extends React.Component {
     }
   }
 
-
   onValidateStateChanged(fieldKey, isValid) {
     let unValidFields = [...this.state.unValidFields];
     const { onValidateStateChanged } = this.props;
@@ -118,8 +121,23 @@ class DocForm extends React.Component {
     }
   }
 
-  onRef(ref, position) {
+  onRef(ref, position, inputKey) {
+    this.inputPositionByKey[inputKey] = position
     this.inputsRef[position] = ref;
+  }
+
+  getOtherFieldRefByKey(inputKey) {
+    const fieldPosition = this.inputPositionByKey[inputKey]
+    return {
+      input: this.inputsRef[fieldPosition],
+      parent: this.renderFieldsRef[inputKey]
+    }
+  }
+
+  onRefRenderField(ref) {
+    if(ref && ref.props) {
+      this.renderFieldsRef[ref.props.id] = ref
+    }
   }
 
   getAllPerviousFields(key) {
@@ -143,6 +161,7 @@ class DocForm extends React.Component {
       enableOpenPickerOnFocusNext, focusNextOnlyIfEmpty, data, fields
     } = this.props;
     const nextField = position + 1;
+    const currentField = position
     if (this.inputsRef[nextField] &&
           (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)
     ) {
@@ -156,8 +175,13 @@ class DocForm extends React.Component {
       } else if (enabledNext && enableOpenPickerOnFocusNext) {
         this.inputsRef[nextField].openPicker();
       }
-    } else if (this.props.fields.length >= (nextField + 1)) {
-      console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+    } else{
+      if (this.props.fields.length >= (nextField + 1)) {
+        console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+      }
+      if(this.inputsRef[currentField]) {
+        this.inputsRef[currentField].blur()
+      }
     }
   }
 
@@ -179,35 +203,69 @@ class DocForm extends React.Component {
     return showWarnings;
   }
 
-  renderField(field, index) {
+  renderField(field, index, isGroup) {
     const { data, requiredPrefix, disabledAll, fieldsOptions } = this.props;
+    const propsToPass = {
+      id: field.key,
+      onRefRenderField: this.onRefRenderField,
+      onRef: this.onRef,
+      position: index,
+      key: field.key,
+      field: field,
+      data: data,
+      onChange: this.onChange,
+      onFocus: this.onFocus,
+      onBlur: this.onBlur,
+      onValidateStateChanged: this.onValidateStateChanged,
+      showWarnings: this.enableValidateField(field),
+      requiredPrefix: requiredPrefix,
+      disabledAll: disabledAll,
+      focusNext: this.focusNext,
+      options: fieldsOptions[field.key],
+      getOtherFieldRefByKey: this.getOtherFieldRefByKey
+    }
+    if(isGroup) {
+      return (propsFromGroup = {}) => <RenderField {...propsToPass} propsFromGroup={propsFromGroup} />
+    }
     return (
-      <RenderField
-        onRef={this.onRef}
-        position={index}
-        key={field.key}
-        field={field}
-        data={data}
-        onChange={this.onChange}
-        onFocus={this.onFocus}
-        onBlur={this.onBlur}
-        onValidateStateChanged={this.onValidateStateChanged}
-        showWarnings={this.enableValidateField(field)}
-        requiredPrefix={requiredPrefix}
-        disabledAll={disabledAll}
-        focusNext={this.focusNext}
-        options={fieldsOptions[field.key]}
-      />
+      <RenderField {...propsToPass} />
     );
   }
 
   renderFields() {
-    const { fields } = this.props;
-    return fields.map((field, index) => this.renderField(field, index));
+    const { fields, render } = this.props;
+    let position = 0
+    let _fields
+    if(render) {
+      _fields = {}
+      fields.forEach((field) => {
+        _fields[field.key] = this.renderField(field, position++)
+      })
+    }else{
+      _fields = []
+      fields.forEach((field) => {
+        if(field.group) {
+          const fieldGroup = {}
+          field.group.forEach(childField => {
+            fieldGroup[childField.key] = this.renderField(childField, position++, true)
+          })
+          const groupElement = React.createElement(field.component, {inputsGroup: fieldGroup, ...field})
+          _fields.push(groupElement)
+        }else{
+          _fields.push(this.renderField(field, position++))
+        }
+      });
+    }
+    return _fields
   }
 
   render() {
-    return this.renderFields();
+    const { render } = this.props;
+    if(render) {
+      return render(this.renderFields())
+    }else{
+      return this.renderFields();
+    }
   }
 }
 
@@ -246,7 +304,6 @@ DocForm.defaultProps = {
   disabledAll: false,
   onChange: () => console.warn('missing onChange')
 };
-
 
 export default DocForm;
 

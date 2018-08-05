@@ -62,8 +62,12 @@ var DocForm = function (_React$Component) {
     _this.onValidateStateChanged = _this.onValidateStateChanged.bind(_this);
     _this.getAllPerviousFields = _this.getAllPerviousFields.bind(_this);
     _this.onRef = _this.onRef.bind(_this);
+    _this.getOtherFieldRefByKey = _this.getOtherFieldRefByKey.bind(_this);
+    _this.onRefRenderField = _this.onRefRenderField.bind(_this);
     _this.fieldsInitialValue = {};
     _this.inputsRef = {};
+    _this.renderFieldsRef = {};
+    _this.inputPositionByKey = {};
     return _this;
   }
 
@@ -178,8 +182,25 @@ var DocForm = function (_React$Component) {
     }
   }, {
     key: 'onRef',
-    value: function onRef(ref, position) {
+    value: function onRef(ref, position, inputKey) {
+      this.inputPositionByKey[inputKey] = position;
       this.inputsRef[position] = ref;
+    }
+  }, {
+    key: 'getOtherFieldRefByKey',
+    value: function getOtherFieldRefByKey(inputKey) {
+      var fieldPosition = this.inputPositionByKey[inputKey];
+      return {
+        input: this.inputsRef[fieldPosition],
+        parent: this.renderFieldsRef[inputKey]
+      };
+    }
+  }, {
+    key: 'onRefRenderField',
+    value: function onRefRenderField(ref) {
+      if (ref && ref.props) {
+        this.renderFieldsRef[ref.props.id] = ref;
+      }
     }
   }, {
     key: 'getAllPerviousFields',
@@ -209,6 +230,7 @@ var DocForm = function (_React$Component) {
           fields = _props4.fields;
 
       var nextField = position + 1;
+      var currentField = position;
       if (this.inputsRef[nextField] && (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)) {
         var enabledNext = true;
         if (focusNextOnlyIfEmpty) {
@@ -220,8 +242,13 @@ var DocForm = function (_React$Component) {
         } else if (enabledNext && enableOpenPickerOnFocusNext) {
           this.inputsRef[nextField].openPicker();
         }
-      } else if (this.props.fields.length >= nextField + 1) {
-        console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+      } else {
+        if (this.props.fields.length >= nextField + 1) {
+          console.warn('react-cross-form - you enabled focusNext but ref/ref.focus() didn\'t found, check the onRef on the next field', { fieldKey: key });
+        }
+        if (this.inputsRef[currentField]) {
+          this.inputsRef[currentField].blur();
+        }
       }
     }
   }, {
@@ -249,14 +276,16 @@ var DocForm = function (_React$Component) {
     }
   }, {
     key: 'renderField',
-    value: function renderField(field, index) {
+    value: function renderField(field, index, isGroup) {
       var _props5 = this.props,
           data = _props5.data,
           requiredPrefix = _props5.requiredPrefix,
           disabledAll = _props5.disabledAll,
           fieldsOptions = _props5.fieldsOptions;
 
-      return _react2.default.createElement(_RenderField2.default, {
+      var propsToPass = {
+        id: field.key,
+        onRefRenderField: this.onRefRenderField,
         onRef: this.onRef,
         position: index,
         key: field.key,
@@ -270,24 +299,60 @@ var DocForm = function (_React$Component) {
         requiredPrefix: requiredPrefix,
         disabledAll: disabledAll,
         focusNext: this.focusNext,
-        options: fieldsOptions[field.key]
-      });
+        options: fieldsOptions[field.key],
+        getOtherFieldRefByKey: this.getOtherFieldRefByKey
+      };
+      if (isGroup) {
+        return function () {
+          var propsFromGroup = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+          return _react2.default.createElement(_RenderField2.default, _extends({}, propsToPass, { propsFromGroup: propsFromGroup }));
+        };
+      }
+      return _react2.default.createElement(_RenderField2.default, propsToPass);
     }
   }, {
     key: 'renderFields',
     value: function renderFields() {
       var _this2 = this;
 
-      var fields = this.props.fields;
+      var _props6 = this.props,
+          fields = _props6.fields,
+          render = _props6.render;
 
-      return fields.map(function (field, index) {
-        return _this2.renderField(field, index);
-      });
+      var position = 0;
+      var _fields = void 0;
+      if (render) {
+        _fields = {};
+        fields.forEach(function (field) {
+          _fields[field.key] = _this2.renderField(field, position++);
+        });
+      } else {
+        _fields = [];
+        fields.forEach(function (field) {
+          if (field.group) {
+            var fieldGroup = {};
+            field.group.forEach(function (childField) {
+              fieldGroup[childField.key] = _this2.renderField(childField, position++, true);
+            });
+            var groupElement = _react2.default.createElement(field.component, _extends({ inputsGroup: fieldGroup }, field));
+            _fields.push(groupElement);
+          } else {
+            _fields.push(_this2.renderField(field, position++));
+          }
+        });
+      }
+      return _fields;
     }
   }, {
     key: 'render',
     value: function render() {
-      return this.renderFields();
+      var render = this.props.render;
+
+      if (render) {
+        return render(this.renderFields());
+      } else {
+        return this.renderFields();
+      }
     }
   }]);
 

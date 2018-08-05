@@ -162,16 +162,16 @@ export default class MyInput extends React.Component {
       onFocus, // function
       onChange, // function
       onBlur, // function
-      isValid, // bollean
-      showWarnings, // bollean
+      isValid, // boolean
+      showWarnings, // boolean
       validatorMessage, // array of errors
-      required, // bollean
+      required, // boolean
       placeholder, // string
       label, // string,
       requiredPrefix, // string
       labelWithPrefix, //string
-      disabled, // bollean
-      autoFocus, // bollean
+      disabled, // boolean
+      autoFocus, // boolean
       requiredPrefix, // string
       onRef, // function
       focusNext // function (Run to focus on the next input)
@@ -267,7 +267,9 @@ const info = {someKey: '123'}
 
 
 ### Parent events call backs
+
 -----
+
 The parent will get an object with relevant data from the input event
  {key, updateData , initialValue , isValid , info}**
 
@@ -276,23 +278,26 @@ The parent will get an object with relevant data from the input event
 - initialValue - this is the inital value of your field from componentDidmount
 - isValid - boolean value base of your validators from [Field object](#field-object)
 - value - this is the new value from your input
+
 *when you call the onChange() from your input the first parameter is the new value
+
 - info- all other info that your input will be passing thru the event call back
+
 ```jsx
 // Example
 return (
-	<DocForm
-		data={this.state.form}
-		fields={FORM_FIELDS}
-		onChange={({key, value, updateData}) => {
-		let  form = {...this.state.form, [key]: value}
-		this.setState({form})
-		// or just use the updateData:
-		// this.setState({form: updateData})
-		}}
-		onBlur={res => {console.log(res.key, ' is blue')}}
-		onFocus={res => {console.log(res.key, ' is focus')}}
-	/>
+    <DocForm
+        data={this.state.form}
+        fields={FORM_FIELDS}
+        onChange={({key, value, updateData}) => {
+        let  form = {...this.state.form, [key]: value}
+        this.setState({form})
+        // or just use the updateData:
+        // this.setState({form: updateData})
+        }}
+        onBlur={res => {console.log(res.key, ' is blue')}}
+        onFocus={res => {console.log(res.key, ' is focus')}}
+    />
 )
 
 ```

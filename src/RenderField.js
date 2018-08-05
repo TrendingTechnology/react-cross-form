@@ -46,7 +46,8 @@ class RenderField extends React.PureComponent {
     if (field.onRef) {
       field.onRef(ref, position);
     }
-    onRef(ref, position);
+    const { key } = field;
+    onRef(ref, position, key);
   }
 
   onFocus(info) {
@@ -63,6 +64,7 @@ class RenderField extends React.PureComponent {
     const { field } = this.props;
     const { key } = field;
     const isValid = isEmpty(this.state.validatorMessage);
+    debugger
     this.props.onChange({
       key, value, isValid, info
     });
@@ -79,12 +81,7 @@ class RenderField extends React.PureComponent {
   }
 
   onKeyPress(e) {
-    if(typeof e === 'object' && e.key){
-        if (e.key === 'Enter') { this.focusNext();
-    }else{
-      console.error('react-cross-form - nextOnKeyPress methods need an onKeyPress, input event, https://reactjs.org/docs/events.html#keyboard-events ')
-    }
-  }
+    if (e && e.key === 'Enter') { this.focusNext(); }
   }
 
   focusNext() {
@@ -96,7 +93,6 @@ class RenderField extends React.PureComponent {
   isFieldValid() {
     return isEmpty(this.state.validatorMessage);
   }
-
 
   validateField(field, value, data) {
     const validatorMessage = field.customValidation ? field.customValidation(field, value, data) : getFieldValidatorMessage(field, value);
@@ -115,27 +111,30 @@ class RenderField extends React.PureComponent {
   renderFieldByType() {
     const {
       field, data, showWarnings, requiredPrefix,
-      disabledAll
+      disabledAll, getOtherFieldRefByKey, onRefRenderField, propsFromGroup
     } = this.props;
     const {
-      validators, key, component, options, label, placeholder, ...resField
+      validators, key, component, options, label, placeholder, helpText, ...resField
     } = field;
     const InputElement = component;
     const value = getFieldValue(field, data);
     const isValid = this.isFieldValid();
     const isRequired = validators && validators.presence;
-    if(this.props.options && field.options){
+    if(this.props.options && field.options) {
       console.warn('react-cross-form - it seem the parent pass an options and you pass options with field configuration, you can find field.options as fieldOptions')
     }
-    const _required = (isRequired && requiredPrefix) ? requiredPrefix : "";
+    const _required = (isRequired && requiredPrefix) ? requiredPrefix : '';
     return (
       <InputElement
+        ref={onRefRenderField}
         key={key}
         id={key}
         // input attributes
         value={value}
         disabled={field.disabled || disabledAll}
-        label={`${_required}${label}`}
+        label={label}
+        requiredPrefix={requiredPrefix}
+        labelWithPrefix={`${_required}${label}`}
         placeholder={placeholder}
         // events
         onFocus={this.onFocus}
@@ -145,18 +144,20 @@ class RenderField extends React.PureComponent {
         onRef={this.onRef}
         onKeyPress={this.onKeyPress}
         focusNext={this.focusNext}
-        onKeyPress={this.onKeyPress}
+        getOtherFieldRefByKey={getOtherFieldRefByKey}
         // validators
         showWarnings={showWarnings}
         isValid={isValid}
         validatorMessage={this.state.validatorMessage}
         required={isRequired}
-        validateStatus={showWarnings ? (isValid ? 'success': "error") : null}
+        validateStatus={showWarnings ? (isValid ? 'success' : 'error') : null}
         // options for dropdowns
         options={this.props.options || options}
         fieldOptions={this.props.options ? options : null}
         // The rest of the field configuration
+        helpText={helpText}
         {...resField}
+        {...propsFromGroup}
       />
     );
   }
@@ -181,9 +182,9 @@ RenderField.propTypes = {
   disabledAll: PropTypes.bool
 };
 RenderField.defaultProps = {
-  data: {}
+  data: {},
+  propsFromGroup: {}
 };
-
 
 /* eslint func-names: 'off' */
 /* eslint linebreak-style: 'off' */
