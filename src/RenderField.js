@@ -18,7 +18,6 @@ class RenderField extends React.PureComponent {
     this.onRef = this.onRef.bind(this);
     this.isFieldValid = this.isFieldValid.bind(this);
     this.focusNext = this.focusNext.bind(this);
-    this.onKeyPress = this.onKeyPress.bind(this);
     this.lastIsFieldValid = true;
     this.lastValidatorMessage = null;
   }
@@ -80,10 +79,6 @@ class RenderField extends React.PureComponent {
     }, position);
   }
 
-  onKeyPress(e) {
-    if (e && e.key === 'Enter') { this.focusNext(); }
-  }
-
   focusNext() {
     const { field, position } = this.props;
     const { key } = field;
@@ -142,7 +137,6 @@ class RenderField extends React.PureComponent {
         onChange={this.onChange}
         // callback that help to focus nextField
         onRef={this.onRef}
-        onKeyPress={this.onKeyPress}
         focusNext={this.focusNext}
         getOtherFieldRefByKey={getOtherFieldRefByKey}
         // validators

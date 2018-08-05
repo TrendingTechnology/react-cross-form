@@ -53,7 +53,6 @@ var RenderField = function (_React$PureComponent) {
     _this.onRef = _this.onRef.bind(_this);
     _this.isFieldValid = _this.isFieldValid.bind(_this);
     _this.focusNext = _this.focusNext.bind(_this);
-    _this.onKeyPress = _this.onKeyPress.bind(_this);
     _this.lastIsFieldValid = true;
     _this.lastValidatorMessage = null;
     return _this;
@@ -140,13 +139,6 @@ var RenderField = function (_React$PureComponent) {
       }, position);
     }
   }, {
-    key: 'onKeyPress',
-    value: function onKeyPress(e) {
-      if (e && e.key === 'Enter') {
-        this.focusNext();
-      }
-    }
-  }, {
     key: 'focusNext',
     value: function focusNext() {
       var _props6 = this.props,
@@ -220,7 +212,6 @@ var RenderField = function (_React$PureComponent) {
         onChange: this.onChange
         // callback that help to focus nextField
         , onRef: this.onRef,
-        onKeyPress: this.onKeyPress,
         focusNext: this.focusNext,
         getOtherFieldRefByKey: getOtherFieldRefByKey
         // validators
