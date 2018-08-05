@@ -75,6 +75,7 @@ export default class Example extends React.Component {
     return (
       <div>
         <h2>Easy form validation example</h2>
+        <form>
         <DocForm
           fields={FORM_FIELDS}
           data={this.state.form}
@@ -84,6 +85,7 @@ export default class Example extends React.Component {
             this.setState({ isFormValid: isValid });
           }}
         />
+        </form>
       </div>
     );
   }
@@ -146,13 +148,6 @@ import React from 'react';
 export default class MyInput extends React.Component {
   constructor(props) {
     super(props);
-    this.onKeyPress = this.onKeyPress.bind(this);
-  }
-
-  onKeyPress(e) {
-    if (e.key === 'Enter') {
-      this.props.focusNext();
-    }
   }
 
   render() {
@@ -190,7 +185,6 @@ export default class MyInput extends React.Component {
           onChange={e => onChange(e.target.value)}
           onBlur={onBlur}
           disabled={disabled}
-          onKeyPress={this.onKeyPress}
         />
         {showWarnings && <p>{validatorMessage}</p>}
       </div>
@@ -205,18 +199,7 @@ Your input will get focusNext funciton from props.<br /><br /> react native - us
 ```
 <TextInput 
 	onSubmitEditing={this.props.focusNext}
-```
-<br />react -  use inside [onKeyPress](https://reactjs.org/docs/events.html#keyboard-events)
-```
-<input
-	onKeyPress={e => if(e.key === 'Enter') {this.props.focusNext ()}}
-```
-focusNext need a reference to your inputs, please call onRef with the input ref
- ```
-<input
- ref={ref => {this.props.onRef(ref)}}
-``` 
-  
+```  
 
 ### validators examples
 -----------------
