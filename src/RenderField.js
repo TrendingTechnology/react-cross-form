@@ -63,7 +63,6 @@ class RenderField extends React.PureComponent {
     const { field } = this.props;
     const { key } = field;
     const isValid = isEmpty(this.state.validatorMessage);
-    debugger
     this.props.onChange({
       key, value, isValid, info
     });
