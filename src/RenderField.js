@@ -15,6 +15,7 @@ class RenderField extends React.PureComponent {
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
     this.onChange = this.onChange.bind(this);
+    this.onChangeAndBlur = this.onChangeAndBlur.bind(this);
     this.onRef = this.onRef.bind(this);
     this.isFieldValid = this.isFieldValid.bind(this);
     this.focusNext = this.focusNext.bind(this);
@@ -32,9 +33,9 @@ class RenderField extends React.PureComponent {
     const { field, data } = this.props;
     const lastValue = getFieldValue(field, prevProps.data);
     const newValue = getFieldValue(field, this.props.data);
-    if (// Input value was changed or input config
-      !isEqual(lastValue, newValue) ||
-      !isEqual(field, prevProps.field)
+    if (
+      !isEqual(lastValue, newValue) || // Input value was changed
+      !isEqual(field, prevProps.field) // Input config was changed
     ) {
       this.validateField(field, newValue, data);
     }
@@ -42,11 +43,11 @@ class RenderField extends React.PureComponent {
 
   onRef(ref) {
     const { onRef, field, position } = this.props;
-    if (field.onRef) {
+    const { key } = field;
+    if (field.onRef) { // onRef from field config
       field.onRef(ref, position);
     }
-    const { key } = field;
-    onRef(ref, position, key);
+    onRef(ref, position, key); //onRef from './index
   }
 
   onFocus(info) {
@@ -68,14 +69,22 @@ class RenderField extends React.PureComponent {
     });
   }
 
+  onChangeAndBlur(value, info) {
+    const { field, position } = this.props;
+    const { key } = field;
+    // We want to validate field before we run this because is not a regular onChange and onBlur flow
+    this.validateField(field, value, this.props.data, (validatorMessage) => {
+      const isValid = !value || isEmpty(validatorMessage); // We add !value because we want to let the user the ability to clean field even if it is a required field
+      this.props.onChangeAndBlur({ key, value, isValid, info }, position);
+    })
+  }
+
   onBlur(info) {
     const { field, data, position } = this.props;
     const { key } = field;
     const value = getFieldValue(field, data);
     const isValid = isEmpty(this.state.validatorMessage);
-    this.props.onBlur({
-      key, value, isValid, info
-    }, position);
+    this.props.onBlur({ key, value, isValid, info }, position);
   }
 
   focusNext() {
@@ -88,7 +97,7 @@ class RenderField extends React.PureComponent {
     return isEmpty(this.state.validatorMessage);
   }
 
-  validateField(field, value, data) {
+  validateField(field, value, data, callBack) {
     const validatorMessage = field.customValidation ? field.customValidation(field, value, data) : getFieldValidatorMessage(field, value);
     const isValid = isEmpty(validatorMessage);
     if (
@@ -98,7 +107,9 @@ class RenderField extends React.PureComponent {
       this.lastIsFieldValid = isValid;
       this.lastValidatorMessage = validatorMessage;
       this.props.onValidateStateChanged(field.key, isValid);
-      this.setState({ validatorMessage });
+      this.setState({ validatorMessage }, () => { if(callBack) { callBack(validatorMessage) } });
+    }else{
+      if(callBack) { callBack(validatorMessage) }
     }
   }
 
@@ -134,6 +145,7 @@ class RenderField extends React.PureComponent {
         onFocus={this.onFocus}
         onBlur={this.onBlur}
         onChange={this.onChange}
+        onChangeAndBlur={this.onChangeAndBlur}
         // callback that help to focus nextField
         onRef={this.onRef}
         focusNext={this.focusNext}
@@ -154,6 +166,7 @@ class RenderField extends React.PureComponent {
       />
     );
   }
+
   render() {
     return this.renderFieldByType();
   }
@@ -176,7 +189,7 @@ RenderField.propTypes = {
 };
 RenderField.defaultProps = {
   data: {},
-  propsFromGroup: {}
+  propsFromGroup: {},
 };
 
 /* eslint func-names: 'off' */

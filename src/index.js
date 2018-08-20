@@ -4,6 +4,8 @@ import isEmpty from 'lodash/isEmpty';
 import RenderField from './RenderField';
 import { getFieldValue } from './helpers';
 
+const USE_ON_CHANGE_AND_BLUR = true;
+
 class DocForm extends React.Component {
   constructor(props) {
     super(props);
@@ -19,61 +21,77 @@ class DocForm extends React.Component {
     this.onBlur = this.onBlur.bind(this);
     this.focusNext = this.focusNext.bind(this);
     this.onChange = this.onChange.bind(this);
+    this.onChangeAndBlur = this.onChangeAndBlur.bind(this);
     this.enableValidateField = this.enableValidateField.bind(this);
     this.onValidateStateChanged = this.onValidateStateChanged.bind(this);
     this.getAllPerviousFields = this.getAllPerviousFields.bind(this);
     this.onRef = this.onRef.bind(this);
     this.getOtherFieldRefByKey = this.getOtherFieldRefByKey.bind(this);
     this.onRefRenderField = this.onRefRenderField.bind(this);
+    this.handleChangedFieldsTracking = this.handleChangedFieldsTracking.bind(this);
+    this.handleFocusFieldTracking = this.handleFocusFieldTracking.bind(this);
+    this.handleBlurFieldTracking = this.handleBlurFieldTracking.bind(this);
     this.fieldsInitialValue = {};
     this.inputsRef = {};
     this.renderFieldsRef = {};
     this.inputPositionByKey = {}
   }
+  // --- Tracking on all fields event, help us know when to show to user fields errors
+  handleChangedFieldsTracking(key) {
+    this.handleTrackingByKeyAndType(key, 'changedFields')
+  }
 
-  onChange(res) {
-    const {
-      key, value, isValid, info
-    } = res;
-    const { changedFields } = this.state;
-    let _changedFields = { ...changedFields };
-    const { onChange, showSkippingFieldsWarnings } = this.props;
-    if (!_changedFields[key]) {
-      _changedFields[key] = true;
+  handleFocusFieldTracking(key) {
+    this.handleTrackingByKeyAndType(key, 'focusFields')
+  }
+
+  handleBlurFieldTracking(key) {
+    this.handleTrackingByKeyAndType(key, 'blurFields')
+  }
+
+  handleTrackingByKeyAndType(key, type) {
+    const { showSkippingFieldsWarnings } = this.props;
+    let updateTracking = { ...this.state[type] };
+    if (!updateTracking[key]) {
+      updateTracking[key] = true;
       if (showSkippingFieldsWarnings) {
-        _changedFields = { ..._changedFields, ...this.getAllPerviousFields(key) };
+        updateTracking = { ...updateTracking, ...this.getAllPerviousFields(key) };
       }
-      this.setState({ changedFields: _changedFields });
+      this.setState({ [type]: updateTracking });
     }
-    const initialValue = this.fieldsInitialValue[key];
-    const updateData = { ...this.props.data, [key]: value };
-    onChange({
-      key, value, isValid, initialValue, updateData, info
-    });
   }
 
   onFocus(res) {
     const {
       key, value, isValid, info
     } = res;
-    const { focusFields } = this.state;
-    const { onFocus, showSkippingFieldsWarnings } = this.props;
-    let _focusFields = { ...focusFields };
-    if (!_focusFields[key]) {
-      _focusFields[key] = true;
-      if (showSkippingFieldsWarnings) {
-        _focusFields = { ..._focusFields, ...this.getAllPerviousFields(key) };
-      }
-      this.setState({ focusFields: _focusFields });
-    }
-
-    this.fieldsInitialValue[key] = value;
-
-    const initialValue = this.fieldsInitialValue[key];
-    if (onFocus) {
-      onFocus({
-        key, value, isValid, initialValue, info
+    this.handleFocusFieldTracking(key)
+    this.fieldsInitialValue[key] = value; // update the initial value
+    if (this.props.onFocus) {
+      this.props.onFocus({
+        key, value, isValid, initialValue: value, info
       });
+    }
+  }
+
+  onChangeAndBlur(res) {
+    this.handleTrackingByKeyAndType(res.key, 'changedFields')
+    this.handleTrackingByKeyAndType(res.key, 'blurFields')
+    this.onChange(res, USE_ON_CHANGE_AND_BLUR)
+  }
+
+  onChange(res, useOnChangeAndBlur) {
+    const { key, value, isValid, info } = res;
+    this.handleChangedFieldsTracking(key);
+    const initialValue = this.fieldsInitialValue[key];
+    const updateData = { ...this.props.data, [key]: value };
+    const payload = {
+      key, value, isValid, initialValue, updateData, info
+    }
+    if(useOnChangeAndBlur) {
+      this.props.onChangeAndBlur(payload)
+    }else{
+      this.props.onChange(payload);
     }
   }
 
@@ -81,37 +99,26 @@ class DocForm extends React.Component {
     const {
       key, value, isValid, info
     } = res;
-    const { blurFields } = this.state;
-    let _blurFields = { ...blurFields };
-    const {
-      onBlur, showSkippingFieldsWarnings
-    } = this.props;
-    if (!blurFields[key]) {
-      _blurFields[key] = true;
-      if (showSkippingFieldsWarnings) {
-        _blurFields = { ..._blurFields, ...this.getAllPerviousFields(key) };
-      }
-      this.setState({ blurFields: _blurFields });
-    }
+    this.handleBlurFieldTracking(key)
     const initialValue = this.fieldsInitialValue[key];
-    if (onBlur) {
-      onBlur({
+    if (this.props.onBlur) {
+      this.props.onBlur({
         key, value, isValid, initialValue, info
       });
     }
   }
 
-  onValidateStateChanged(fieldKey, isValid) {
+  onValidateStateChanged(fieldKey, isValid) { // This will call from './RenderField'
     let unValidFields = [...this.state.unValidFields];
     const { onValidateStateChanged } = this.props;
-    if (isValid) {
+    if (isValid) { // Remove valid field
       unValidFields = unValidFields.filter(field => field !== fieldKey);
       this.setState({ unValidFields }, () => {
         if (onValidateStateChanged) {
-          onValidateStateChanged({ unValidFields, isValid: unValidFields.length < 1 });
+          onValidateStateChanged({ unValidFields, isValid: !unValidFields.length });
         }
       });
-    } else {
+    } else { // Add un valid field
       unValidFields.push(fieldKey);
       this.setState({ unValidFields }, () => {
         if (onValidateStateChanged) {
@@ -121,12 +128,12 @@ class DocForm extends React.Component {
     }
   }
 
-  onRef(ref, position, inputKey) {
+  onRef(ref, position, inputKey) { // We want to save all fields ref to let the focusNext option
     this.inputPositionByKey[inputKey] = position
     this.inputsRef[position] = ref;
   }
 
-  getOtherFieldRefByKey(inputKey) {
+  getOtherFieldRefByKey(inputKey) { // Sometimes one field need to manipulate another field, with this he can
     const fieldPosition = this.inputPositionByKey[inputKey]
     return {
       input: this.inputsRef[fieldPosition],
@@ -134,7 +141,7 @@ class DocForm extends React.Component {
     }
   }
 
-  onRefRenderField(ref) {
+  onRefRenderField(ref) { // We want to pass on getOtherFieldRefByKey input ref and wrapper(RenderField) ref;
     if(ref && ref.props) {
       this.renderFieldsRef[ref.props.id] = ref
     }
@@ -216,6 +223,7 @@ class DocForm extends React.Component {
       onChange: this.onChange,
       onFocus: this.onFocus,
       onBlur: this.onBlur,
+      onChangeAndBlur: this.onChangeAndBlur,
       onValidateStateChanged: this.onValidateStateChanged,
       showWarnings: this.enableValidateField(field),
       requiredPrefix: requiredPrefix,
@@ -273,7 +281,7 @@ DocForm.propTypes = {
   data: PropTypes.object, // {firstName: 'David', age: 35}
   fields: PropTypes.PropTypes.arrayOf(PropTypes.shape({
     key: PropTypes.string.isRequired, // firstName
-    label: PropTypes.string.isRequired, // i18n('firstName')
+    label: PropTypes.string, // i18n('firstName')
     component: PropTypes.any.isRequired, // TextInput
     required: PropTypes.bool, // true
     disabled: PropTypes.bool, // false
@@ -283,7 +291,8 @@ DocForm.propTypes = {
     placeholder: PropTypes.string
   })),
   validateType: PropTypes.oneOf(['none', 'all', 'onFocus', 'onBlur', 'onChange']),
-  onChange: PropTypes.func.isRequired, // {key, value,isValid, initialValue, updateData, info}
+  onChange: PropTypes.func.isRequired, // {key, value,isValid, initialValue, updateData, info},
+  onChangeAndBlur: PropTypes.func, // {key, value,isValid, initialValue, updateData, info}
   onFocus: PropTypes.func, // () => {key, value, isValid, initialValue, info}
   onBlur: PropTypes.func, // () => {key, value, isValid, initialValue, info}
   onValidateStateChanged: PropTypes.func, // () => {unValidFields, isValid}
@@ -302,7 +311,8 @@ DocForm.defaultProps = {
   validateType: 'all',
   requiredPrefix: '*',
   disabledAll: false,
-  onChange: () => console.warn('missing onChange')
+  onChange: () => console.warn('react-cross-form - missing onChange'),
+  onChangeAndBlur: () => console.log('react-cross-form -missing onChangeAndBlur')
 };
 
 export default DocForm;
