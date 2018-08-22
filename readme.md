@@ -119,7 +119,7 @@ more info about field object:
 |---|---|---|
 |key|string(required)|Key of for the value in the data
 |component|element(required)|Any component that you want to render, see what your componant will get [Component props](#component-props)|
-|formatter|function|If you want to format the value, you can pass a function the received (field, documentData) and return the input value|
+|formatter|function|If you want to format the value, you can pass a function the received ({field, documentData}) and return the input value|
 |validators|object|For example: { presence: true, email: true }, you can learn more in https://validatejs.org/#validators and see [More validate examples](#validate.js-examples))|
 |customvalidation|function|Pass function that get ()field, value and return array of validation errros, see [CustomValidation exmple](#customvalidation-exmple)|
 |disabled|boolean| Input disabled value|
