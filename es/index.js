@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.buildValidateJsObject = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -28,6 +29,8 @@ var _helpers = require('./helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -37,6 +40,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var buildValidateJsObject = exports.buildValidateJsObject = _helpers.buildValidateJsObject;
 
 var USE_ON_CHANGE_AND_BLUR = true;
 
@@ -130,6 +135,8 @@ var DocForm = function (_React$Component) {
       this.handleTrackingByKeyAndType(res.key, 'changedFields');
       this.handleTrackingByKeyAndType(res.key, 'blurFields');
       this.onChange(res, USE_ON_CHANGE_AND_BLUR);
+      // USE_ON_CHANGE_AND_BLUR is a way to run onChange and share
+      // onChange method but run onChangeAndBlur at the end
     }
   }, {
     key: 'onChange',
@@ -251,7 +258,7 @@ var DocForm = function (_React$Component) {
       if (this.inputsRef[nextField] && (this.inputsRef[nextField].focus || this.inputsRef[nextField].openPicker)) {
         var enabledNext = true;
         if (focusNextOnlyIfEmpty) {
-          var nextFieldValue = (0, _helpers.getFieldValue)(fields[nextField], data);
+          var nextFieldValue = (0, _helpers.getFieldValue)(fields[nextField], data, this.props);
           enabledNext = (0, _isEmpty2.default)(nextFieldValue);
         }
         if (enabledNext && this.inputsRef[nextField].focus) {
@@ -298,7 +305,10 @@ var DocForm = function (_React$Component) {
           data = _props2.data,
           requiredPrefix = _props2.requiredPrefix,
           disabledAll = _props2.disabledAll,
-          fieldsOptions = _props2.fieldsOptions;
+          fieldsOptions = _props2.fieldsOptions,
+          dispatchId = _props2.dispatchId,
+          isLoading = _props2.isLoading,
+          resProps = _objectWithoutProperties(_props2, ['data', 'requiredPrefix', 'disabledAll', 'fieldsOptions', 'dispatchId', 'isLoading']);
 
       var propsToPass = {
         id: field.key,
@@ -318,7 +328,10 @@ var DocForm = function (_React$Component) {
         disabledAll: disabledAll,
         focusNext: this.focusNext,
         options: fieldsOptions[field.key],
-        getOtherFieldRefByKey: this.getOtherFieldRefByKey
+        getOtherFieldRefByKey: this.getOtherFieldRefByKey,
+        dispatchId: dispatchId,
+        isLoading: isLoading,
+        resProps: resProps
       };
       if (isGroup) {
         return function () {
@@ -385,7 +398,7 @@ DocForm.propTypes = process.env.NODE_ENV !== "production" ? {
     component: _propTypes2.default.any.isRequired, // TextInput
     required: _propTypes2.default.bool, // true
     disabled: _propTypes2.default.bool, // false
-    formatter: _propTypes2.default.func, // () => {field , documentData}
+    formatter: _propTypes2.default.func, // () => {field , documentData} // We using this inside the helpers.js
     validators: _propTypes2.default.object, // { presence: true, email: true } // https://validatejs.org/#validators,
     customValidation: _propTypes2.default.function, // { field, value, data } need to return array of string
     placeholder: _propTypes2.default.string

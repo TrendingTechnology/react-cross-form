@@ -25,14 +25,14 @@ class RenderField extends React.PureComponent {
 
   componentWillMount() {
     const { field, data } = this.props;
-    const value = getFieldValue(field, data);
+    const value = getFieldValue(field, data, this.props);
     this.validateField(field, value, data);
   }
 
   componentDidUpdate(prevProps) {
     const { field, data } = this.props;
-    const lastValue = getFieldValue(field, prevProps.data);
-    const newValue = getFieldValue(field, this.props.data);
+    const lastValue = getFieldValue(field, prevProps.data, prevProps);
+    const newValue = getFieldValue(field, this.props.data, this.props);
     if (
       !isEqual(lastValue, newValue) || // Input value was changed
       !isEqual(field, prevProps.field) // Input config was changed
@@ -53,7 +53,7 @@ class RenderField extends React.PureComponent {
   onFocus(info) {
     const { field, data } = this.props;
     const { key } = field;
-    const value = getFieldValue(field, data);
+    const value = getFieldValue(field, data, this.props);
     const isValid = isEmpty(this.state.validatorMessage);
     this.props.onFocus({
       key, value, isValid, info
@@ -64,9 +64,10 @@ class RenderField extends React.PureComponent {
     const { field } = this.props;
     const { key } = field;
     const isValid = isEmpty(this.state.validatorMessage);
-    this.props.onChange({
+    const parameters = {
       key, value, isValid, info
-    });
+    }
+    this.props.onChange(parameters);
   }
 
   onChangeAndBlur(value, info) {
@@ -75,16 +76,24 @@ class RenderField extends React.PureComponent {
     // We want to validate field before we run this because is not a regular onChange and onBlur flow
     this.validateField(field, value, this.props.data, (validatorMessage) => {
       const isValid = !value || isEmpty(validatorMessage); // We add !value because we want to let the user the ability to clean field even if it is a required field
-      this.props.onChangeAndBlur({ key, value, isValid, info }, position);
+      const parameters = { key, value, isValid, info }
+      this.props.onChangeAndBlur(parameters, position);
+      if(field.onChanged) {
+        field.onChanged(parameters, this.props)
+      }
     })
   }
 
   onBlur(info) {
     const { field, data, position } = this.props;
     const { key } = field;
-    const value = getFieldValue(field, data);
+    const value = getFieldValue(field, data, this.props);
     const isValid = isEmpty(this.state.validatorMessage);
-    this.props.onBlur({ key, value, isValid, info }, position);
+    const parameters = { key, value, isValid, info }
+    this.props.onBlur(parameters, position);
+    if(field.onChanged) {
+      field.onChanged(parameters, this.props)
+    }
   }
 
   focusNext() {
@@ -98,7 +107,7 @@ class RenderField extends React.PureComponent {
   }
 
   validateField(field, value, data, callBack) {
-    const validatorMessage = field.customValidation ? field.customValidation(field, value, data) : getFieldValidatorMessage(field, value);
+    const validatorMessage = field.customValidation ? field.customValidation(field, value, data, this.props) : getFieldValidatorMessage(field, value);
     const isValid = isEmpty(validatorMessage);
     if (
       !isEqual(isValid, this.lastIsFieldValid) ||
@@ -116,54 +125,62 @@ class RenderField extends React.PureComponent {
   renderFieldByType() {
     const {
       field, data, showWarnings, requiredPrefix,
-      disabledAll, getOtherFieldRefByKey, onRefRenderField, propsFromGroup
+      disabledAll, getOtherFieldRefByKey, onRefRenderField, propsFromGroup,
+      isLoading, dispatchId
     } = this.props;
     const {
-      validators, key, component, options, label, placeholder, helpText, ...resField
+      validators, key, component, options, label, placeholder, helpText, render, ...resField
     } = field;
     const InputElement = component;
-    const value = getFieldValue(field, data);
+    const value = getFieldValue(field, data, this.props);
     const isValid = this.isFieldValid();
     const isRequired = validators && validators.presence;
     if(this.props.options && field.options) {
       console.warn('react-cross-form - it seem the parent pass an options and you pass options with field configuration, you can find field.options as fieldOptions')
     }
     const _required = (isRequired && requiredPrefix) ? requiredPrefix : '';
+    const propsToPass = {
+      ref: onRefRenderField,
+      key: key,
+      id: key,
+      // input attributes
+      value: value,
+      disabled: field.disabled || disabledAll,
+      label: label,
+      requiredPrefix: requiredPrefix,
+      labelWithPrefix: `${_required}${label}`,
+      placeholder: placeholder,
+      // events
+      onFocus: this.onFocus,
+      onBlur: this.onBlur,
+      onChange: this.onChange,
+      onChangeAndBlur: this.onChangeAndBlur,
+      // callback that help to focus nextField
+      onRef: this.onRef,
+      focusNext: this.focusNext,
+      getOtherFieldRefByKey: getOtherFieldRefByKey,
+      // validators
+      showWarnings: showWarnings,
+      isValid: isValid,
+      validatorMessage: this.state.validatorMessage,
+      required: isRequired,
+      validateStatus: showWarnings ? (isValid ? 'success' : 'error') : null,
+      // options for dropdowns
+      options: this.props.options || options,
+      fieldOptions: this.props.options ? options : null,
+      // The rest of the field configuration
+      helpText: helpText,
+      dispatchId: dispatchId,
+      isLoading: isLoading,
+      ...resField,
+      ...propsFromGroup,
+      documentData: data
+    }
+    if(render) {
+      return render(propsToPass)
+    }
     return (
-      <InputElement
-        ref={onRefRenderField}
-        key={key}
-        id={key}
-        // input attributes
-        value={value}
-        disabled={field.disabled || disabledAll}
-        label={label}
-        requiredPrefix={requiredPrefix}
-        labelWithPrefix={`${_required}${label}`}
-        placeholder={placeholder}
-        // events
-        onFocus={this.onFocus}
-        onBlur={this.onBlur}
-        onChange={this.onChange}
-        onChangeAndBlur={this.onChangeAndBlur}
-        // callback that help to focus nextField
-        onRef={this.onRef}
-        focusNext={this.focusNext}
-        getOtherFieldRefByKey={getOtherFieldRefByKey}
-        // validators
-        showWarnings={showWarnings}
-        isValid={isValid}
-        validatorMessage={this.state.validatorMessage}
-        required={isRequired}
-        validateStatus={showWarnings ? (isValid ? 'success' : 'error') : null}
-        // options for dropdowns
-        options={this.props.options || options}
-        fieldOptions={this.props.options ? options : null}
-        // The rest of the field configuration
-        helpText={helpText}
-        {...resField}
-        {...propsFromGroup}
-      />
+      <InputElement {...propsToPass} />
     );
   }
 

@@ -1,6 +1,7 @@
 
 
 
+
 # React cross Form
 
 Easy form for react and react-native apps with validation.
@@ -65,7 +66,7 @@ export default class Example extends React.Component {
 			},
 			isValid: false
 		};
-		this.onChange - this.onChange.bind(this)
+		this.onChange = this.onChange.bind(this)
 	}
 	onChange({updateData}){
 		this.setState({ form: updateData })
@@ -108,6 +109,7 @@ export default class Example extends React.Component {
 |disabledAll|boolean|Set true if you want to disable all fields|
 |focusNextOnlyIfEmpty|boolean|Set true if you want to focus on the next input only if is empty|
 |render|fonction|if you want to customize the layout, for example, you want to wrapper any input with other element or put between the inputs some other element, you can use render props function that will get  an object with all the inputs and return the view to render|
+onChanged|function|This function will run after field onChange, helpful for manipulating other field onChange, see [onChanged example](#onchanged-example)
 
 
 ### Fields
@@ -121,21 +123,31 @@ more info about field object:
 |component|element(required)|Any component that you want to render, see what your componant will get [Component props](#component-props)|
 |formatter|function|If you want to format the value, you can pass a function the received ({field, documentData}) and return the input value|
 |validators|object|For example: { presence: true, email: true }, you can learn more in https://validatejs.org/#validators and see [More validate examples](#validate.js-examples))|
-|customvalidation|function|Pass function that get ()field, value and return array of validation errros, see [CustomValidation exmple](#customvalidation-exmple)|
+|customValidation|function|Pass function that get ()field, value and return array of validation errros, see [CustomValidation exmple](#customvalidation-exmple)|
 |disabled|boolean| Input disabled value|
 |placeholder|string| Input placeholder value|
 |label|string| Input label value
 |helpText|string| Sometimes we want to render help text under the field
+render|function| You can pass render method that return a component
 
 ### Fields configuration example
 ```jsx
-const FIELDS = [{ 
+const FIELDS = [
+	{ 
 	key:  'firstName',
 	label:  i18n.t('First Name'),
 	component:  TextInput,
 	validators: { presence:  true, length: { minimum:  2 }},
 	autoFocus:  true
-}]
+	},
+	{
+		key: 'options',
+		label: 'Options',
+		render: (props) => {
+			return  <TextInput  {...props}  />
+		},
+	}
+]
 <DocForm fields={FIELDS}/>
 ```
 
@@ -201,8 +213,36 @@ Your input will get focusNext funciton from props.<br /><br /> react native - us
 	onSubmitEditing={this.props.focusNext}
 ```  
 
+## validators
+We recommend you to work with [validate.js](https://validatejs.org/) guide to build your validators object.
+but if you want, you can use our helper that can help you to build the object but he didn't include all the options
+### buildValidateJsObject
+```jxs
+import  Form, {buildValidateJsObject} from  'react-cross-form';
+
+const validtors = buildValidateJsObject({
+	required: true,
+	min: 3,
+	max:6,
+	isEmail: false,
+	isNumber: true,
+	isUrl: false,
+	isDate: false,
+	earliest: null,
+	latest: null
+})
+/* 
+The result will be-
+{
+	"presence":true,
+	"numericality:{
+		"greaterThan":3,
+		"lessThan":6
+	}
+}
+*/
+```
 ### validators examples
------------------
 ```jsx
 
 // Email
@@ -234,7 +274,7 @@ There are 3 events that will pass to your inputs and you handle from the parent:
 | event | input side(event) | parent side(callback)|
 |--|--|--|
 |onFocus|Just run the funtion , you didn't need to pass any value|Your callback will get {key, value, isValid, initialValue, info}
-|onChanged|onChange(value)|Your callback will get {key, value, isValid, initialValue, updateData, info}
+|onChange|onChange(value)|Your callback will get {key, value, isValid, initialValue, updateData, info}
 |onBlur|Just run the funtion , you didn't need to pass any value|Your callback will get {key, value, isValid, initialValue, updateData, info}
 
 <small>**info**- you can pass to component parent any  parameters you need with this events callbacs.
@@ -300,7 +340,7 @@ const  formFields  = [
 	key: 'mobile',
 	label: i18n.t('Mobile'),
 	component: MobileInput,
-	customValidation : function (field, value){
+	customValidation : function (field, value, data, formProps){
 		let  errors  = []
 		if(value  ===  ''){
 			errors.push('can\'t be blank')
@@ -475,6 +515,29 @@ in this example we use the parent props, the parent is the wrapper of the locati
     accessToken: envConfig.MAP_BOX_ACCESS_TOKEN
   },
 ]
+```
+
+### 3 - onChanged example
+```jsx
+export  const  DocFields  = [
+	{
+		key: 'value',
+		label: 'Value',
+		onChanged: (field, props) => {
+		const  displayValue  = props.getOtherFieldRefByKey('display').parent.props.value
+		if(!displayValue  ||  displayValue  ===  '') {
+		props.getOtherFieldRefByKey('display').parent.props.onChanged(field.value)
+		}
+		},
+		component: TextInput
+	},
+	{
+		key: 'display',
+		label: 'Display',
+		validators: { presence: true },
+		component: TextInput
+	}
+];
 ```
 ## Dependencies
 -	isEmpty/lodash

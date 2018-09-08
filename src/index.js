@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import RenderField from './RenderField';
-import { getFieldValue } from './helpers';
+import { getFieldValue, buildValidateJsObject as _buildValidateJsObject } from './helpers';
+
+export const buildValidateJsObject = _buildValidateJsObject
 
 const USE_ON_CHANGE_AND_BLUR = true;
 
@@ -78,6 +80,8 @@ class DocForm extends React.Component {
     this.handleTrackingByKeyAndType(res.key, 'changedFields')
     this.handleTrackingByKeyAndType(res.key, 'blurFields')
     this.onChange(res, USE_ON_CHANGE_AND_BLUR)
+    // USE_ON_CHANGE_AND_BLUR is a way to run onChange and share
+    // onChange method but run onChangeAndBlur at the end
   }
 
   onChange(res, useOnChangeAndBlur) {
@@ -174,7 +178,7 @@ class DocForm extends React.Component {
     ) {
       let enabledNext = true;
       if (focusNextOnlyIfEmpty) {
-        const nextFieldValue = getFieldValue(fields[nextField], data);
+        const nextFieldValue = getFieldValue(fields[nextField], data, this.props);
         enabledNext = isEmpty(nextFieldValue);
       }
       if (enabledNext && this.inputsRef[nextField].focus) {
@@ -211,7 +215,7 @@ class DocForm extends React.Component {
   }
 
   renderField(field, index, isGroup) {
-    const { data, requiredPrefix, disabledAll, fieldsOptions } = this.props;
+    const { data, requiredPrefix, disabledAll, fieldsOptions, dispatchId, isLoading, ...resProps } = this.props;
     const propsToPass = {
       id: field.key,
       onRefRenderField: this.onRefRenderField,
@@ -230,7 +234,10 @@ class DocForm extends React.Component {
       disabledAll: disabledAll,
       focusNext: this.focusNext,
       options: fieldsOptions[field.key],
-      getOtherFieldRefByKey: this.getOtherFieldRefByKey
+      getOtherFieldRefByKey: this.getOtherFieldRefByKey,
+      dispatchId: dispatchId,
+      isLoading: isLoading,
+      resProps
     }
     if(isGroup) {
       return (propsFromGroup = {}) => <RenderField {...propsToPass} propsFromGroup={propsFromGroup} />
@@ -285,7 +292,7 @@ DocForm.propTypes = {
     component: PropTypes.any.isRequired, // TextInput
     required: PropTypes.bool, // true
     disabled: PropTypes.bool, // false
-    formatter: PropTypes.func, // () => {field , documentData}
+    formatter: PropTypes.func, // () => {field , documentData} // We using this inside the helpers.js
     validators: PropTypes.object, // { presence: true, email: true } // https://validatejs.org/#validators,
     customValidation: PropTypes.function, // { field, value, data } need to return array of string
     placeholder: PropTypes.string

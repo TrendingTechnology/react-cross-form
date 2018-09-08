@@ -66,7 +66,7 @@ var RenderField = function (_React$PureComponent) {
           field = _props.field,
           data = _props.data;
 
-      var value = (0, _helpers.getFieldValue)(field, data);
+      var value = (0, _helpers.getFieldValue)(field, data, this.props);
       this.validateField(field, value, data);
     }
   }, {
@@ -76,8 +76,8 @@ var RenderField = function (_React$PureComponent) {
           field = _props2.field,
           data = _props2.data;
 
-      var lastValue = (0, _helpers.getFieldValue)(field, prevProps.data);
-      var newValue = (0, _helpers.getFieldValue)(field, this.props.data);
+      var lastValue = (0, _helpers.getFieldValue)(field, prevProps.data, prevProps);
+      var newValue = (0, _helpers.getFieldValue)(field, this.props.data, this.props);
       if (!(0, _isEqual2.default)(lastValue, newValue) || // Input value was changed
       !(0, _isEqual2.default)(field, prevProps.field) // Input config was changed
       ) {
@@ -107,7 +107,7 @@ var RenderField = function (_React$PureComponent) {
           data = _props4.data;
       var key = field.key;
 
-      var value = (0, _helpers.getFieldValue)(field, data);
+      var value = (0, _helpers.getFieldValue)(field, data, this.props);
       var isValid = (0, _validate.isEmpty)(this.state.validatorMessage);
       this.props.onFocus({
         key: key, value: value, isValid: isValid, info: info
@@ -120,9 +120,10 @@ var RenderField = function (_React$PureComponent) {
       var key = field.key;
 
       var isValid = (0, _validate.isEmpty)(this.state.validatorMessage);
-      this.props.onChange({
+      var parameters = {
         key: key, value: value, isValid: isValid, info: info
-      });
+      };
+      this.props.onChange(parameters);
     }
   }, {
     key: 'onChangeAndBlur',
@@ -137,7 +138,11 @@ var RenderField = function (_React$PureComponent) {
 
       this.validateField(field, value, this.props.data, function (validatorMessage) {
         var isValid = !value || (0, _validate.isEmpty)(validatorMessage); // We add !value because we want to let the user the ability to clean field even if it is a required field
-        _this2.props.onChangeAndBlur({ key: key, value: value, isValid: isValid, info: info }, position);
+        var parameters = { key: key, value: value, isValid: isValid, info: info };
+        _this2.props.onChangeAndBlur(parameters, position);
+        if (field.onChanged) {
+          field.onChanged(parameters, _this2.props);
+        }
       });
     }
   }, {
@@ -149,9 +154,13 @@ var RenderField = function (_React$PureComponent) {
           position = _props6.position;
       var key = field.key;
 
-      var value = (0, _helpers.getFieldValue)(field, data);
+      var value = (0, _helpers.getFieldValue)(field, data, this.props);
       var isValid = (0, _validate.isEmpty)(this.state.validatorMessage);
-      this.props.onBlur({ key: key, value: value, isValid: isValid, info: info }, position);
+      var parameters = { key: key, value: value, isValid: isValid, info: info };
+      this.props.onBlur(parameters, position);
+      if (field.onChanged) {
+        field.onChanged(parameters, this.props);
+      }
     }
   }, {
     key: 'focusNext',
@@ -171,7 +180,7 @@ var RenderField = function (_React$PureComponent) {
   }, {
     key: 'validateField',
     value: function validateField(field, value, data, callBack) {
-      var validatorMessage = field.customValidation ? field.customValidation(field, value, data) : (0, _helpers.getFieldValidatorMessage)(field, value);
+      var validatorMessage = field.customValidation ? field.customValidation(field, value, data, this.props) : (0, _helpers.getFieldValidatorMessage)(field, value);
       var isValid = (0, _validate.isEmpty)(validatorMessage);
       if (!(0, _isEqual2.default)(isValid, this.lastIsFieldValid) || !(0, _isEqual2.default)(validatorMessage, this.lastValidatorMessage)) {
         this.lastIsFieldValid = isValid;
@@ -199,7 +208,9 @@ var RenderField = function (_React$PureComponent) {
           disabledAll = _props8.disabledAll,
           getOtherFieldRefByKey = _props8.getOtherFieldRefByKey,
           onRefRenderField = _props8.onRefRenderField,
-          propsFromGroup = _props8.propsFromGroup;
+          propsFromGroup = _props8.propsFromGroup,
+          isLoading = _props8.isLoading,
+          dispatchId = _props8.dispatchId;
 
       var validators = field.validators,
           key = field.key,
@@ -208,48 +219,57 @@ var RenderField = function (_React$PureComponent) {
           label = field.label,
           placeholder = field.placeholder,
           helpText = field.helpText,
-          resField = _objectWithoutProperties(field, ['validators', 'key', 'component', 'options', 'label', 'placeholder', 'helpText']);
+          render = field.render,
+          resField = _objectWithoutProperties(field, ['validators', 'key', 'component', 'options', 'label', 'placeholder', 'helpText', 'render']);
 
       var InputElement = component;
-      var value = (0, _helpers.getFieldValue)(field, data);
+      var value = (0, _helpers.getFieldValue)(field, data, this.props);
       var isValid = this.isFieldValid();
       var isRequired = validators && validators.presence;
       if (this.props.options && field.options) {
         console.warn('react-cross-form - it seem the parent pass an options and you pass options with field configuration, you can find field.options as fieldOptions');
       }
       var _required = isRequired && requiredPrefix ? requiredPrefix : '';
-      return _react2.default.createElement(InputElement, _extends({
+      var propsToPass = _extends({
         ref: onRefRenderField,
         key: key,
-        id: key
+        id: key,
         // input attributes
-        , value: value,
+        value: value,
         disabled: field.disabled || disabledAll,
         label: label,
         requiredPrefix: requiredPrefix,
         labelWithPrefix: '' + _required + label,
-        placeholder: placeholder
+        placeholder: placeholder,
         // events
-        , onFocus: this.onFocus,
+        onFocus: this.onFocus,
         onBlur: this.onBlur,
         onChange: this.onChange,
-        onChangeAndBlur: this.onChangeAndBlur
+        onChangeAndBlur: this.onChangeAndBlur,
         // callback that help to focus nextField
-        , onRef: this.onRef,
+        onRef: this.onRef,
         focusNext: this.focusNext,
-        getOtherFieldRefByKey: getOtherFieldRefByKey
+        getOtherFieldRefByKey: getOtherFieldRefByKey,
         // validators
-        , showWarnings: showWarnings,
+        showWarnings: showWarnings,
         isValid: isValid,
         validatorMessage: this.state.validatorMessage,
         required: isRequired,
-        validateStatus: showWarnings ? isValid ? 'success' : 'error' : null
+        validateStatus: showWarnings ? isValid ? 'success' : 'error' : null,
         // options for dropdowns
-        , options: this.props.options || options,
-        fieldOptions: this.props.options ? options : null
+        options: this.props.options || options,
+        fieldOptions: this.props.options ? options : null,
         // The rest of the field configuration
-        , helpText: helpText
-      }, resField, propsFromGroup));
+        helpText: helpText,
+        dispatchId: dispatchId,
+        isLoading: isLoading
+      }, resField, propsFromGroup, {
+        documentData: data
+      });
+      if (render) {
+        return render(propsToPass);
+      }
+      return _react2.default.createElement(InputElement, propsToPass);
     }
   }, {
     key: 'render',
